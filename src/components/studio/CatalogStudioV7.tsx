@@ -24,6 +24,22 @@ type Props = React.ComponentProps<typeof CatalogStudioV5> & {
   onReplacePages?: (pages: Page[]) => void;
 };
 
+function addProductsToTargetPage(pages: Page[], pageId: string, ids: string[]) {
+  const uniqueIds = Array.from(new Set(ids));
+  return pages.map((page) => {
+    if (page.id !== pageId) return page;
+    const content = (page as any).content ?? {};
+    const currentIds = content.productIds ?? [];
+    const productIds = Array.from(new Set([...currentIds, ...uniqueIds]));
+    let nextIndex = 0;
+    const blocks = (content.blocks ?? []).map((block: any) => {
+      if (block.type !== 'frame' || block.frameKind !== 'product' || nextIndex >= uniqueIds.length) return block;
+      return { ...block, productId: uniqueIds[nextIndex++] };
+    });
+    return { ...page, content: { ...content, productIds, blocks } };
+  });
+}
+
 export function CatalogStudioV7(props: Props) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -59,8 +75,9 @@ export function CatalogStudioV7(props: Props) {
   const toggleFiltered = () => setSelected(allFilteredSelected ? new Set() : new Set(filtered.map((product) => product.id)));
   const addFiltered = () => {
     const target = orderedPages.find((page) => page.id === targetId);
-    if (!target || !props.onReplacePages || !filtered.length) return;
-    props.onReplacePages(pages);
+    const ids = selected.size ? [...selected] : filtered.map((product) => product.id);
+    if (!target || !props.onReplacePages || !ids.length) return;
+    props.onReplacePages(addProductsToTargetPage(pages, target.id, ids));
     setSelected(new Set());
     setOpen(false);
   };
