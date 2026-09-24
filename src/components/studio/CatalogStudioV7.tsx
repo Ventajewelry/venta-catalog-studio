@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Check, Filter, RotateCcw, X } from 'lucide-react';
-import { CatalogStudioV5 } from './CatalogStudioV5';
+import { CatalogStudioFinal } from './CatalogStudioFinal';
 
 type Product = {
   id: string;
@@ -86,7 +86,7 @@ export function CatalogStudioV7(props: Props) {
 
   return (
     <>
-      <CatalogStudioV5 {...props} />
+      <CatalogStudioFinal {...(props as any)} />
       <button type="button" onClick={() => setOpen(true)} className="fixed right-5 bottom-5 z-[300] h-11 px-4 bg-[#0f203a] text-white shadow-xl flex items-center gap-2 text-[9px] uppercase tracking-[.15em]"><Filter size={14} /> Ürün Seç / Filtrele</button>
       {open && <div className="fixed inset-0 z-[400] bg-black/30 flex items-center justify-center p-5" onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(false); }}>
         <div className="w-[820px] max-w-full max-h-[90vh] bg-white shadow-2xl flex flex-col text-[#0f203a]">
