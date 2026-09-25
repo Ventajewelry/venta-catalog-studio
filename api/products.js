@@ -1,7 +1,116 @@
-const {getValidSession}=require('./auth-utils.cjs');const {getUser}=require('./user-auth.js');
-function errorText(errors){if(!errors)return '';if(Array.isArray(errors))return errors.map(e=>e?.message||String(e)).join('; ');if(typeof errors==='string')return errors;if(typeof errors==='object')return errors.message||JSON.stringify(errors);return String(errors)}
-async function shopifyGraphql(session,query,variables={}){const r=await fetch(`https://${session.shop}/admin/api/2026-07/graphql.json`,{method:'POST',headers:{'Content-Type':'application/json','X-Shopify-Access-Token':session.accessToken},body:JSON.stringify({query,variables})});const text=await r.text();let json;try{json=JSON.parse(text)}catch{throw new Error(`Shopify API returned non-JSON (${r.status})`)}if(!r.ok||json.errors){const e=new Error(errorText(json.errors)||`Shopify API request failed (${r.status})`);e.status=r.status;throw e;}return json.data;}
-function siteCategory(p){const text=`${p.title||''} ${p.productType||''} ${(p.tags||[]).join(' ')} ${p.category?.fullName||''}`.toLocaleLowerCase('tr-TR');if(text.includes('bileklik'))return'Pırlanta Bileklikler';if(text.includes('küpe'))return'Pırlanta Küpeler';if(text.includes('kolye')||text.includes('gerdanlık'))return'Pırlanta Kolyeler';if(text.includes('yüzük'))return'Pırlanta Yüzükler';return p.category?.fullName||p.productType||'Diğer';}
-function parseKarat(p){const raw=p.metafield?.value||p.metafield?.valueRaw;const fromMeta=raw==null?undefined:Number.parseFloat(String(raw).replace(',','.').replace(/[^0-9.]/g,''))||undefined;if(fromMeta)return fromMeta;const m=String(p.title||'').match(/(\d+(?:[,.]\d+)?)\s*(?:karat|ct)\b/i);return m?Number.parseFloat(m[1].replace(',','.')):undefined;}
-function normalizeProduct(p){const variant=p.variants?.nodes?.[0];const collections=p.collections?.nodes||[];const category=siteCategory(p);const karat=parseKarat(p);return{id:p.id,name:p.title,description:p.descriptionHtml||'',price:Number(variant?.price||0),sku:variant?.sku||'',material:p.vendor||'',images:p.images?.nodes?.map(i=>i.url).filter(Boolean)||[],karat,category,categoryId:p.category?.id||`site:${category}`,categoryFullName:p.category?.fullName||category,collectionId:collections[0]?.id||'',collectionIds:collections.map(c=>c.id),collectionNames:collections.map(c=>c.title),handle:p.handle,url:p.onlineStoreUrl||null,tags:p.tags||[],productType:p.productType||'',variants:p.variants?.nodes||[]};}
-module.exports=async(req,res)=>{try{if(req.method!=='GET')return res.status(405).json({error:'Method not allowed'});if(!getUser(req))return res.status(401).json({connected:false,error:'Dahili kullanıcı girişi gerekli.'});let s=await getValidSession(req,res);if(!s?.shop||!s?.accessToken)return res.status(401).json({connected:false,error:'Shopify bağlantısı gerekli.'});const query=`query($after:String){shop{name primaryDomain{host}} products(first:250,after:$after,sortKey:TITLE){nodes{id title handle descriptionHtml productType vendor tags onlineStoreUrl category{id name fullName parentId level isLeaf} metafield(namespace:"custom",key:"karat"){value} images(first:10){nodes{id url altText}} variants(first:20){nodes{id title sku price compareAtPrice inventoryQuantity}} collections(first:50){nodes{id title}}} pageInfo{hasNextPage endCursor}}}`;let after=null,products=[],hasNext=true,pages=0,shopName='',primaryDomain=null;while(hasNext&&pages<100){let data;try{data=await shopifyGraphql(s,query,{after})}catch(e){if(e.status===401&&s.refreshToken){s=await getValidSession(req,res,{forceRefresh:true});data=await shopifyGraphql(s,query,{after})}else throw e;}shopName=data.shop.name;primaryDomain=data.shop.primaryDomain?.host||null;products.push(...data.products.nodes.map(normalizeProduct));hasNext=data.products.pageInfo.hasNextPage;after=data.products.pageInfo.endCursor;pages++;}const categoryMap=new Map();products.forEach(p=>{categoryMap.set(p.categoryId,p.category);(p.collectionIds||[]).forEach((id,i)=>categoryMap.set(`collection:${id}`,p.collectionNames?.[i]||p.category));});const categories=[...categoryMap.entries()].map(([id,name])=>({id,name})).sort((a,b)=>a.name.localeCompare(b.name,'tr'));return res.status(200).json({connected:true,shop:s.shop,shopName,primaryDomain,products,categories,pageInfo:{hasNextPage:false,endCursor:null,total:products.length}});}catch(error){console.error(error);const status=error.code==='SHOPIFY_REAUTH_REQUIRED'?401:500;return res.status(status).json({connected:false,error:error.message||'Shopify ürünleri alınamadı.',reauthorize:status===401});}};
+/**
+ * Catalog product source.
+ * Products are fetched from the public Venta Jewelry storefront, so Catalog
+ * Studio does not depend on a separate Shopify OAuth/admin session.
+ */
+const STOREFRONT_URL = String(process.env.CATALOG_STOREFRONT_URL || 'https://ventajewelry.com')
+  .replace(/\/$/, '');
+
+function parseKarat(product) {
+  const text = `${product.title || ''} ${product.product_type || ''} ${(product.tags || []).join(' ')}`;
+  const match = text.match(/(\d+(?:[,.]\d+)?)\s*(?:karat|ct)\b/i);
+  return match ? Number.parseFloat(match[1].replace(',', '.')) : undefined;
+}
+
+function categoryFor(product) {
+  return String(product.product_type || product.vendor || 'Diğer').trim() || 'Diğer';
+}
+
+function normalizeStorefrontProduct(product) {
+  const firstVariant = product.variants?.[0] || {};
+  const category = categoryFor(product);
+  const images = (product.images || [])
+    .map((image) => image?.src)
+    .filter(Boolean);
+
+  return {
+    id: String(product.id),
+    name: product.title || 'İsimsiz ürün',
+    description: product.body_html || '',
+    price: Number(firstVariant.price || 0),
+    sku: firstVariant.sku || '',
+    material: product.vendor || '',
+    images,
+    karat: parseKarat(product),
+    category,
+    categoryId: `type:${category}`,
+    categoryFullName: category,
+    collectionId: '',
+    collectionIds: [],
+    collectionNames: [],
+    handle: product.handle || '',
+    url: product.handle ? `${STOREFRONT_URL}/products/${product.handle}` : null,
+    tags: Array.isArray(product.tags) ? product.tags : [],
+    productType: product.product_type || '',
+    variants: (product.variants || []).map((variant) => ({
+      id: String(variant.id),
+      title: variant.title || '',
+      sku: variant.sku || '',
+      price: Number(variant.price || 0),
+      compareAtPrice: variant.compare_at_price == null ? null : Number(variant.compare_at_price),
+      inventoryQuantity: variant.inventory_quantity,
+    })),
+  };
+}
+
+async function getStorefrontProducts() {
+  const products = [];
+  const pageSize = 250;
+
+  for (let page = 1; page <= 100; page += 1) {
+    const response = await fetch(
+      `${STOREFRONT_URL}/products.json?limit=${pageSize}&page=${page}`,
+      { headers: { Accept: 'application/json' } },
+    );
+
+    if (!response.ok) {
+      throw new Error(`Web sitesi ürün kaynağına ulaşılamadı (${response.status}).`);
+    }
+
+    const payload = await response.json();
+    const pageProducts = Array.isArray(payload?.products) ? payload.products : [];
+    products.push(...pageProducts);
+
+    if (pageProducts.length < pageSize) break;
+  }
+
+  return products;
+}
+
+module.exports = async (req, res) => {
+  try {
+    if (req.method !== 'GET') {
+      return res.status(405).json({ error: 'Method not allowed' });
+    }
+
+    const rawProducts = await getStorefrontProducts();
+    const products = rawProducts.map(normalizeStorefrontProduct);
+
+    const categories = [...new Map(
+      products.map((product) => [
+        product.categoryId,
+        { id: product.categoryId, name: product.category },
+      ]),
+    ).values()].sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+
+    return res.status(200).json({
+      connected: true,
+      source: 'venta-storefront',
+      shopName: 'Venta Jewelry',
+      primaryDomain: 'ventajewelry.com',
+      products,
+      categories,
+      pageInfo: {
+        hasNextPage: false,
+        endCursor: null,
+        total: products.length,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(502).json({
+      connected: false,
+      error: error.message || 'Web sitesi ürünleri alınamadı.',
+    });
+  }
+};
