@@ -1,3 +1,15 @@
-const crypto=require('crypto');const {parseCookies}=require('./auth-utils.cjs');
-function decryptSession(value){const secret=process.env.SHOPIFY_SESSION_SECRET||process.env.SHOPIFY_API_SECRET;if(!secret)return null;const key=crypto.createHash('sha256').update(secret).digest();const[iv64,tag64,data64]=String(value||'').split('.');if(!iv64||!tag64||!data64)return null;try{const d=crypto.createDecipheriv('aes-256-gcm',key,Buffer.from(iv64,'base64url'));d.setAuthTag(Buffer.from(tag64,'base64url'));return JSON.parse(Buffer.concat([d.update(Buffer.from(data64,'base64url')),d.final()]).toString('utf8'));}catch{return null;}}
-module.exports=async(req,res)=>{const s=decryptSession(parseCookies(req.headers.cookie||'').venta_shopify_session);res.status(200).json(s?.shop?{connected:true,shop:s.shop,connectedAt:s.connectedAt}:{connected:false});};
+/**
+ * Catalog Studio uses the public Venta storefront as its product source.
+ * A separate Shopify admin session is not required.
+ */
+module.exports = async (req, res) => {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  return res.status(200).json({
+    connected: true,
+    source: 'venta-storefront',
+    shop: 'ventajewelry.com',
+  });
+};
