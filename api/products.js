@@ -93,6 +93,7 @@ module.exports = async (req, res) => {
       ]),
     ).values()].sort((a, b) => a.name.localeCompare(b.name, 'tr'));
 
+    res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600');
     return res.status(200).json({
       connected: true,
       source: 'venta-storefront',
