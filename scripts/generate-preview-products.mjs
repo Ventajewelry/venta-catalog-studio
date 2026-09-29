@@ -1,0 +1,50 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+
+const root = process.cwd();
+const base = 'https://ventajewelry.com';
+const products = [];
+
+for (let page = 1; page <= 100; page += 1) {
+  const response = await fetch(`${base}/products.json?limit=250&page=${page}`, {
+    headers: { Accept: 'application/json' },
+  });
+  if (!response.ok) throw new Error(`Preview ürünleri alınamadı: ${response.status}`);
+  const payload = await response.json();
+  const batch = Array.isArray(payload.products) ? payload.products : [];
+  products.push(...batch);
+  if (batch.length < 250) break;
+}
+
+const normalized = products.map((product) => {
+  const variant = product.variants?.[0] || {};
+  const tags = Array.isArray(product.tags) ? product.tags : [];
+  const tagged = (names) => {
+    const found = tags.find((tag) => names.some((name) => String(tag).toLocaleLowerCase('tr-TR').startsWith(`${name}:`)));
+    return found ? String(found).split(':').slice(1).join(':').trim() : undefined;
+  };
+  const category = String(product.product_type || product.vendor || 'Diğer').trim() || 'Diğer';
+  const match = `${product.title || ''} ${product.product_type || ''} ${(product.tags || []).join(' ')}`.match(/(\d+(?:[,.]\d+)?)\s*(?:karat|ct)\b/i);
+  return {
+    id: String(product.id),
+    name: product.title || 'İsimsiz ürün',
+    sku: variant.sku || '',
+    price: Number(variant.price || 0),
+    images: (product.images || []).map((image) => image?.src).filter(Boolean),
+    category,
+    categoryId: `type:${category}`,
+    karat: match ? Number(match[1].replace(',', '.')) : undefined,
+    color: tagged(['renk', 'color']),
+    clarity: tagged(['berraklık', 'berraklik', 'clarity']),
+    certificate: tagged(['sertifika', 'certificate']),
+    stone: tagged(['taş', 'tas', 'stone']),
+    collectionId: '',
+  };
+});
+
+const categories = [...new Map(normalized.map((product) => [product.categoryId, { id: product.categoryId, name: product.category }])).values()]
+  .sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+
+await fs.mkdir(path.join(root, 'public'), { recursive: true });
+await fs.writeFile(path.join(root, 'public', 'preview-products.json'), JSON.stringify({ products: normalized, categories }));
+console.log(`Preview ürün listesi hazır: ${normalized.length} ürün, ${categories.length} kategori`);
