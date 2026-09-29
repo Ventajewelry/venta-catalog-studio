@@ -33,6 +33,7 @@ async function getProductMetafields(req, res) {
     products(first: 250, after: $after) {
       nodes {
         legacyResourceId
+        collections(first: 250) { nodes { id title } }
         metafields(first: 100) { nodes { key namespace value definition { name } } }
       }
       pageInfo { hasNextPage endCursor }
@@ -52,7 +53,12 @@ async function getProductMetafields(req, res) {
     const connection = payload.data?.products;
     for (const product of connection?.nodes || []) {
       const fields = product.metafields?.nodes || [];
+      const collections = (product.collections?.nodes || []).map((collection) => ({ id: collection.id, name: collection.title }));
       result.set(String(product.legacyResourceId), {
+        collectionId: collections[0]?.id || '',
+        collectionIds: collections.map((collection) => collection.id),
+        collectionNames: collections.map((collection) => collection.name),
+        category: collections[0]?.name || '',
         color: fieldValue(fields, ['renk', 'color']),
         clarity: fieldValue(fields, ['berraklık', 'clarity']),
         certificate: fieldValue(fields, ['sertifika', 'sertifika bilgileri', 'certificate']),
@@ -78,7 +84,7 @@ function categoryFor(product) {
 
 function normalizeStorefrontProduct(product, metafields = {}) {
   const firstVariant = product.variants?.[0] || {};
-  const category = categoryFor(product);
+  const category = metafields.category || categoryFor(product);
   const images = (product.images || [])
     .map((image) => image?.src)
     .filter(Boolean);
@@ -98,11 +104,11 @@ function normalizeStorefrontProduct(product, metafields = {}) {
     images,
     karat: parseKarat(product),
     category,
-    categoryId: `type:${category}`,
+    categoryId: metafields.collectionId || `type:${category}`,
     categoryFullName: category,
-    collectionId: '',
-    collectionIds: [],
-    collectionNames: [],
+    collectionId: metafields.collectionId || '',
+    collectionIds: metafields.collectionIds || [],
+    collectionNames: metafields.collectionNames || [],
     handle: product.handle || '',
     url: product.handle ? `${STOREFRONT_URL}/products/${product.handle}` : null,
     tags: Array.isArray(product.tags) ? product.tags : [],
@@ -159,10 +165,9 @@ module.exports = async (req, res) => {
     const products = rawProducts.map((product) => normalizeStorefrontProduct(product, metafields.get(String(product.id))));
 
     const categories = [...new Map(
-      products.map((product) => [
-        product.categoryId,
-        { id: product.categoryId, name: product.category },
-      ]),
+      products
+        .filter((product) => product.collectionId && product.category)
+        .map((product) => [product.collectionId, { id: product.collectionId, name: product.category }]),
     ).values()].sort((a, b) => a.name.localeCompare(b.name, 'tr'));
 
     res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600');
