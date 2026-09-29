@@ -13,7 +13,7 @@ export interface PageBlock{
   x?:number;y?:number;width?:number;height?:number;zIndex?:number;objectFit?:'cover'|'contain';
   imageScale?:number; imagePositionX?:number; imagePositionY?:number;
   fontFamily?:string;fontSize?:number;fontWeight?:number;fontStyle?:'normal'|'italic';textAlign?:'left'|'center'|'right';
-  textColor?:string; frameKind?:'image'|'product'; borderWidth?:number;borderRadius?:number;borderColor?:string;productInfo?:ProductInfoSettings;
+  textColor?:string; frameKind?:'image'|'product'|'empty'; borderWidth?:number;borderRadius?:number;borderColor?:string;productInfo?:ProductInfoSettings;
   locked?:boolean;fitMode?:'cover'|'contain';
 }
 export interface CatalogSettings{
@@ -33,6 +33,6 @@ export interface Page{
   content:{images?:string[];productIds?:string[];blocks?:PageBlock[];headline?:string;subheadline?:string;body?:string;quote?:string;hotspots?:Hotspot[]};
   style?:{backgroundColor?:string;backgroundImage?:string;textColor?:string;customMargins?:string;overlayOpacity?:number;fontFamily?:string;fontSize?:number;lineHeight?:number;
     showHeader?:boolean;headerText?:string;showFooter?:boolean;footerText?:string;showPageNumber?:boolean;pageNumberPosition?:CatalogSettings['pageNumberPosition'];
-    gridSize?:number;gridVisible?:boolean;gridSnap?:boolean;gridLocked?:boolean;}
+    gridSize?:number;gridVisible?:boolean;gridSnap?:boolean;gridLocked?:boolean;headerWidth?:number;headerHeight?:number;footerWidth?:number;footerHeight?:number;gridGapHorizontal?:number;gridGapVertical?:number;gridInsetLeft?:number;gridInsetRight?:number;gridInsetTop?:number;gridInsetBottom?:number;productInfoOverrides?:Partial<ProductInfoSettings>;headerFontSize?:number;headerFontWeight?:300|400|500|600;headerColor?:string;footerFontSize?:number;footerFontWeight?:300|400|500|600;footerColor?:string;}
 }
 export interface Hotspot{productId:string;x:number;y:number}
