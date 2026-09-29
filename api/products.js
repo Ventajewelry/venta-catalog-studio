@@ -7,13 +7,21 @@ const STOREFRONT_URL = String(process.env.CATALOG_STOREFRONT_URL || 'https://ven
   .replace(/\/$/, '');
 const { getValidSession } = require('./auth-utils.cjs');
 
+function normalizeFieldName(value) {
+  return String(value || '')
+    .toLocaleLowerCase('tr-TR')
+    .replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ı/g, 'i')
+    .replace(/ö/g, 'o').replace(/ş/g, 's').replace(/ü/g, 'u')
+    .replace(/[^a-z0-9]+/g, '');
+}
+
 function fieldValue(fields, names) {
-  const wanted = names.map((name) => name.toLocaleLowerCase('tr-TR'));
+  const wanted = names.map(normalizeFieldName);
   const found = fields.find((field) => {
-    const candidates = [field.key, field.namespace, field.definition?.name]
+    const candidates = [field.key, field.definition?.name]
       .filter(Boolean)
-      .map((value) => String(value).toLocaleLowerCase('tr-TR'));
-    return candidates.some((value) => wanted.includes(value));
+      .map(normalizeFieldName);
+    return candidates.some((value) => wanted.some((name) => value === name || value.includes(name)));
   });
   return found?.value || '';
 }
@@ -47,9 +55,9 @@ async function getProductMetafields(req, res) {
       result.set(String(product.legacyResourceId), {
         color: fieldValue(fields, ['renk', 'color']),
         clarity: fieldValue(fields, ['berraklık', 'clarity']),
-        certificate: fieldValue(fields, ['sertifika', 'certificate']),
-        stone: fieldValue(fields, ['taş özellikleri', 'taş', 'stone']),
-        properties: fieldValue(fields, ['ürün özellikleri', 'product properties']),
+        certificate: fieldValue(fields, ['sertifika', 'sertifika bilgileri', 'certificate']),
+        stone: fieldValue(fields, ['taş özellikleri', 'tas ozellikleri', 'taş', 'stone properties', 'stone']),
+        properties: fieldValue(fields, ['ürün özellikleri', 'urun ozellikleri', 'product properties']),
       });
     }
     hasNextPage = Boolean(connection?.pageInfo?.hasNextPage);
