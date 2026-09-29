@@ -84,7 +84,9 @@ function categoryFor(product) {
 
 function normalizeStorefrontProduct(product, metafields = {}) {
   const firstVariant = product.variants?.[0] || {};
-  const category = metafields.category || categoryFor(product);
+  // Never fabricate a category from a product title/type. Catalog filters only
+  // expose collections that genuinely exist in Shopify.
+  const category = metafields.category || '';
   const images = (product.images || [])
     .map((image) => image?.src)
     .filter(Boolean);
@@ -104,7 +106,7 @@ function normalizeStorefrontProduct(product, metafields = {}) {
     images,
     karat: parseKarat(product),
     category,
-    categoryId: metafields.collectionId || `type:${category}`,
+    categoryId: metafields.collectionId || '',
     categoryFullName: category,
     collectionId: metafields.collectionId || '',
     collectionIds: metafields.collectionIds || [],
