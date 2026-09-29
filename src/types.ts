@@ -7,13 +7,13 @@ export type LayoutId=
   |'LAYOUT_S_MAGAZINE'|'LAYOUT_T_PRODUCT_INDEX'|'COVER'|'BACK_COVER';
 export type PageBlockType='image'|'product'|'text'|'frame';
 export type TextStyleSettings={fontSize?:number;fontWeight?:300|400|500|600;color?:string;align?:'left'|'center'|'right'};
-export interface ProductInfoSettings{showName:boolean;showSku:boolean;showPrice:boolean;showMaterial:boolean;showCategory:boolean;showDescription:boolean;position:'below'|'overlay'|'left'|'right';align:'left'|'center'|'right';fontFamily?:string;fontSize?:number;color?:string;pricePrefix?:string;lineGap?:number;discountPercent?:number;nameStyle?:TextStyleSettings;skuStyle?:TextStyleSettings;priceStyle?:TextStyleSettings;}
+export interface ProductInfoSettings{showName:boolean;showSku:boolean;showPrice:boolean;showMaterial:boolean;showCategory:boolean;showDescription:boolean;showColor?:boolean;showClarity?:boolean;showCertificate?:boolean;showStone?:boolean;showProperties?:boolean;position:'below'|'overlay'|'left'|'right';align:'left'|'center'|'right';fontFamily?:string;fontSize?:number;color?:string;pricePrefix?:string;lineGap?:number;discountPercent?:number;nameStyle?:TextStyleSettings;skuStyle?:TextStyleSettings;priceStyle?:TextStyleSettings;metaStyle?:TextStyleSettings;}
 export interface PageBlock{
   id:string; type:PageBlockType; url?:string; productId?:string; linkUrl?:string; showQr?:boolean; alt?:string;
   x?:number;y?:number;width?:number;height?:number;zIndex?:number;objectFit?:'cover'|'contain';
   imageScale?:number; imagePositionX?:number; imagePositionY?:number;
   fontFamily?:string;fontSize?:number;fontWeight?:number;fontStyle?:'normal'|'italic';textAlign?:'left'|'center'|'right';
-  textColor?:string; frameKind?:'image'|'product'; borderWidth?:number;borderRadius?:number;borderColor?:string;productInfo?:ProductInfoSettings;
+  textColor?:string; frameKind?:'image'|'product'|'empty'; borderWidth?:number;borderRadius?:number;borderColor?:string;productInfo?:ProductInfoSettings;
   locked?:boolean;fitMode?:'cover'|'contain';
 }
 export interface CatalogSettings{
@@ -21,11 +21,11 @@ export interface CatalogSettings{
   pageNumberPosition:'top-left'|'top-center'|'top-right'|'bottom-left'|'bottom-center'|'bottom-right';
   showFooter:boolean;footerText:string;footerPageNumbers:boolean;footerPosition:'left'|'center'|'right';
   marginTop:number;marginRight:number;marginBottom:number;marginLeft:number;showBorder:boolean;backgroundColor:string;
-  gridSize?:number;gridVisible?:boolean;gridSnap?:boolean;headerPosition?:'left'|'center'|'right';headerFontSize?:number;headerFontWeight?:300|400|500|600;headerColor?:string;footerFontSize?:number;footerFontWeight?:300|400|500|600;footerColor?:string;productInfoDefaults?:ProductInfoSettings;
+  gridSize?:number;gridVisible?:boolean;gridSnap?:boolean;productCardGap?:number;headerPosition?:'left'|'center'|'right';headerFontSize?:number;headerFontWeight?:300|400|500|600;headerColor?:string;footerFontSize?:number;footerFontWeight?:300|400|500|600;footerColor?:string;productInfoDefaults?:ProductInfoSettings;
 }
 export interface Catalog{id:string;name:string;description:string;coverImage:string;logoUrl?:string;createdAt:string;updatedAt:string;
   status:'draft'|'published';theme:{primaryColor:string;secondaryColor:string;serifFont:string;sansFont:string};settings?:CatalogSettings}
-export interface Product{id:string;name:string;description:string;price:number;sku:string;material:string;images:string[];karat?:number;category:string;categoryId?:string;categoryFullName?:string;
+export interface Product{id:string;name:string;description:string;price:number;sku:string;material:string;images:string[];karat?:number;color?:string;clarity?:string;certificate?:string;stone?:string;properties?:string;category:string;categoryId?:string;categoryFullName?:string;
   collectionId:string;collectionIds?:string[];collectionNames?:string[];handle?:string;url?:string|null;tags?:string[];productType?:string;variants?:any[]}
 export interface Collection{id:string;name:string;season:string;description:string;heroImage:string}
 export interface Page{
@@ -33,6 +33,6 @@ export interface Page{
   content:{images?:string[];productIds?:string[];blocks?:PageBlock[];headline?:string;subheadline?:string;body?:string;quote?:string;hotspots?:Hotspot[]};
   style?:{backgroundColor?:string;backgroundImage?:string;textColor?:string;customMargins?:string;overlayOpacity?:number;fontFamily?:string;fontSize?:number;lineHeight?:number;
     showHeader?:boolean;headerText?:string;showFooter?:boolean;footerText?:string;showPageNumber?:boolean;pageNumberPosition?:CatalogSettings['pageNumberPosition'];
-    gridSize?:number;gridVisible?:boolean;gridSnap?:boolean;gridLocked?:boolean;}
+    gridSize?:number;gridVisible?:boolean;gridSnap?:boolean;gridLocked?:boolean;headerWidth?:number;headerHeight?:number;footerWidth?:number;footerHeight?:number;gridGapHorizontal?:number;gridGapVertical?:number;gridInsetLeft?:number;gridInsetRight?:number;gridInsetTop?:number;gridInsetBottom?:number;productInfoOverrides?:Partial<ProductInfoSettings>;headerFontSize?:number;headerFontWeight?:300|400|500|600;headerColor?:string;footerFontSize?:number;footerFontWeight?:300|400|500|600;footerColor?:string;}
 }
 export interface Hotspot{productId:string;x:number;y:number}
