@@ -5,6 +5,58 @@
  */
 const STOREFRONT_URL = String(process.env.CATALOG_STOREFRONT_URL || 'https://ventajewelry.com')
   .replace(/\/$/, '');
+const { getValidSession } = require('./auth-utils.cjs');
+
+function fieldValue(fields, names) {
+  const wanted = names.map((name) => name.toLocaleLowerCase('tr-TR'));
+  const found = fields.find((field) => {
+    const candidates = [field.key, field.namespace, field.definition?.name]
+      .filter(Boolean)
+      .map((value) => String(value).toLocaleLowerCase('tr-TR'));
+    return candidates.some((value) => wanted.includes(value));
+  });
+  return found?.value || '';
+}
+
+async function getProductMetafields(req, res) {
+  let session = await getValidSession(req, res);
+  if (!session?.shop || !session?.accessToken) return new Map();
+  const query = `query ProductMetafields($after: String) {
+    products(first: 250, after: $after) {
+      nodes {
+        legacyResourceId
+        metafields(first: 100) { nodes { key namespace value definition { name } } }
+      }
+      pageInfo { hasNextPage endCursor }
+    }
+  }`;
+  const result = new Map();
+  let after = null;
+  let hasNextPage = true;
+  while (hasNextPage) {
+    const response = await fetch(`https://${session.shop}/admin/api/2026-07/graphql.json`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Shopify-Access-Token': session.accessToken },
+      body: JSON.stringify({ query, variables: { after } }),
+    });
+    const payload = await response.json();
+    if (!response.ok || payload.errors) throw new Error('Shopify ürün meta alanları okunamadı.');
+    const connection = payload.data?.products;
+    for (const product of connection?.nodes || []) {
+      const fields = product.metafields?.nodes || [];
+      result.set(String(product.legacyResourceId), {
+        color: fieldValue(fields, ['renk', 'color']),
+        clarity: fieldValue(fields, ['berraklık', 'clarity']),
+        certificate: fieldValue(fields, ['sertifika', 'certificate']),
+        stone: fieldValue(fields, ['taş özellikleri', 'taş', 'stone']),
+        properties: fieldValue(fields, ['ürün özellikleri', 'product properties']),
+      });
+    }
+    hasNextPage = Boolean(connection?.pageInfo?.hasNextPage);
+    after = connection?.pageInfo?.endCursor || null;
+  }
+  return result;
+}
 
 function parseKarat(product) {
   const text = `${product.title || ''} ${product.product_type || ''} ${(product.tags || []).join(' ')}`;
@@ -16,7 +68,7 @@ function categoryFor(product) {
   return String(product.product_type || product.vendor || 'Diğer').trim() || 'Diğer';
 }
 
-function normalizeStorefrontProduct(product) {
+function normalizeStorefrontProduct(product, metafields = {}) {
   const firstVariant = product.variants?.[0] || {};
   const category = categoryFor(product);
   const images = (product.images || [])
@@ -30,6 +82,11 @@ function normalizeStorefrontProduct(product) {
     price: Number(firstVariant.price || 0),
     sku: firstVariant.sku || '',
     material: product.vendor || '',
+    color: metafields.color || '',
+    clarity: metafields.clarity || '',
+    certificate: metafields.certificate || '',
+    stone: metafields.stone || '',
+    properties: metafields.properties || '',
     images,
     karat: parseKarat(product),
     category,
@@ -84,7 +141,14 @@ module.exports = async (req, res) => {
     }
 
     const rawProducts = await getStorefrontProducts();
-    const products = rawProducts.map(normalizeStorefrontProduct);
+    let metafields = new Map();
+    try {
+      metafields = await getProductMetafields(req, res);
+    } catch (metaError) {
+      // Catalog browsing remains available if a Shopify session is absent or expired.
+      console.warn('Product metafields unavailable:', metaError.message);
+    }
+    const products = rawProducts.map((product) => normalizeStorefrontProduct(product, metafields.get(String(product.id))));
 
     const categories = [...new Map(
       products.map((product) => [
