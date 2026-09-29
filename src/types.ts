@@ -7,7 +7,7 @@ export type LayoutId=
   |'LAYOUT_S_MAGAZINE'|'LAYOUT_T_PRODUCT_INDEX'|'COVER'|'BACK_COVER';
 export type PageBlockType='image'|'product'|'text'|'frame';
 export type TextStyleSettings={fontSize?:number;fontWeight?:300|400|500|600;color?:string;align?:'left'|'center'|'right'};
-export interface ProductInfoSettings{showName:boolean;showSku:boolean;showPrice:boolean;showMaterial:boolean;showCategory:boolean;showDescription:boolean;showColor?:boolean;showClarity?:boolean;showCertificate?:boolean;showStone?:boolean;position:'below'|'overlay'|'left'|'right';align:'left'|'center'|'right';fontFamily?:string;fontSize?:number;color?:string;pricePrefix?:string;lineGap?:number;discountPercent?:number;nameStyle?:TextStyleSettings;skuStyle?:TextStyleSettings;priceStyle?:TextStyleSettings;metaStyle?:TextStyleSettings;}
+export interface ProductInfoSettings{showName:boolean;showSku:boolean;showPrice:boolean;showMaterial:boolean;showCategory:boolean;showDescription:boolean;showColor?:boolean;showClarity?:boolean;showCertificate?:boolean;showStone?:boolean;showProperties?:boolean;position:'below'|'overlay'|'left'|'right';align:'left'|'center'|'right';fontFamily?:string;fontSize?:number;color?:string;pricePrefix?:string;lineGap?:number;discountPercent?:number;nameStyle?:TextStyleSettings;skuStyle?:TextStyleSettings;priceStyle?:TextStyleSettings;metaStyle?:TextStyleSettings;}
 export interface PageBlock{
   id:string; type:PageBlockType; url?:string; productId?:string; linkUrl?:string; showQr?:boolean; alt?:string;
   x?:number;y?:number;width?:number;height?:number;zIndex?:number;objectFit?:'cover'|'contain';
@@ -25,7 +25,7 @@ export interface CatalogSettings{
 }
 export interface Catalog{id:string;name:string;description:string;coverImage:string;logoUrl?:string;createdAt:string;updatedAt:string;
   status:'draft'|'published';theme:{primaryColor:string;secondaryColor:string;serifFont:string;sansFont:string};settings?:CatalogSettings}
-export interface Product{id:string;name:string;description:string;price:number;sku:string;material:string;images:string[];karat?:number;color?:string;clarity?:string;certificate?:string;stone?:string;category:string;categoryId?:string;categoryFullName?:string;
+export interface Product{id:string;name:string;description:string;price:number;sku:string;material:string;images:string[];karat?:number;color?:string;clarity?:string;certificate?:string;stone?:string;properties?:string;category:string;categoryId?:string;categoryFullName?:string;
   collectionId:string;collectionIds?:string[];collectionNames?:string[];handle?:string;url?:string|null;tags?:string[];productType?:string;variants?:any[]}
 export interface Collection{id:string;name:string;season:string;description:string;heroImage:string}
 export interface Page{
