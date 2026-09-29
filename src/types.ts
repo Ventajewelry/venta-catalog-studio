@@ -6,7 +6,8 @@ export type LayoutId=
   |'LAYOUT_P_IMAGE_4_PRODUCTS'|'LAYOUT_Q_SPLIT_EDITORIAL'|'LAYOUT_R_PRODUCT_WALL'
   |'LAYOUT_S_MAGAZINE'|'LAYOUT_T_PRODUCT_INDEX'|'COVER'|'BACK_COVER';
 export type PageBlockType='image'|'product'|'text'|'frame';
-export interface ProductInfoSettings{showName:boolean;showSku:boolean;showPrice:boolean;showMaterial:boolean;showCategory:boolean;showDescription:boolean;position:'below'|'overlay'|'left'|'right';align:'left'|'center'|'right';fontFamily?:string;fontSize?:number;color?:string;pricePrefix?:string;lineGap?:number;discountPercent?:number;}
+export type TextStyleSettings={fontSize?:number;fontWeight?:300|400|500|600;color?:string;align?:'left'|'center'|'right'};
+export interface ProductInfoSettings{showName:boolean;showSku:boolean;showPrice:boolean;showMaterial:boolean;showCategory:boolean;showDescription:boolean;position:'below'|'overlay'|'left'|'right';align:'left'|'center'|'right';fontFamily?:string;fontSize?:number;color?:string;pricePrefix?:string;lineGap?:number;discountPercent?:number;nameStyle?:TextStyleSettings;skuStyle?:TextStyleSettings;priceStyle?:TextStyleSettings;}
 export interface PageBlock{
   id:string; type:PageBlockType; url?:string; productId?:string; linkUrl?:string; showQr?:boolean; alt?:string;
   x?:number;y?:number;width?:number;height?:number;zIndex?:number;objectFit?:'cover'|'contain';
@@ -20,7 +21,7 @@ export interface CatalogSettings{
   pageNumberPosition:'top-left'|'top-center'|'top-right'|'bottom-left'|'bottom-center'|'bottom-right';
   showFooter:boolean;footerText:string;footerPageNumbers:boolean;footerPosition:'left'|'center'|'right';
   marginTop:number;marginRight:number;marginBottom:number;marginLeft:number;showBorder:boolean;backgroundColor:string;
-  gridSize?:number;gridVisible?:boolean;gridSnap?:boolean;headerPosition?:'left'|'center'|'right';productInfoDefaults?:ProductInfoSettings;
+  gridSize?:number;gridVisible?:boolean;gridSnap?:boolean;headerPosition?:'left'|'center'|'right';headerFontSize?:number;headerFontWeight?:300|400|500|600;headerColor?:string;footerFontSize?:number;footerFontWeight?:300|400|500|600;footerColor?:string;productInfoDefaults?:ProductInfoSettings;
 }
 export interface Catalog{id:string;name:string;description:string;coverImage:string;logoUrl?:string;createdAt:string;updatedAt:string;
   status:'draft'|'published';theme:{primaryColor:string;secondaryColor:string;serifFont:string;sansFont:string};settings?:CatalogSettings}
