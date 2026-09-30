@@ -70,3 +70,5 @@
 .catalog-mobile-preview .catalog-product-modal > div > div:last-child {padding:10px}
 .catalog-mobile-preview .catalog-product-modal input,.catalog-mobile-preview .catalog-product-modal select {min-width:0}
 
+@media(max-width:767px){.catalog-shell main{touch-action:pan-y}}
+.catalog-mobile-preview main{touch-action:pan-y}
