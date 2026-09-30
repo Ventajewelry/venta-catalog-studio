@@ -17,7 +17,7 @@ const write=(f,s)=>fs.writeFileSync(f,s);
 
  // Stack actual catalog pages only at mobile widths; desktop retains its single canvas.
  if(!s.includes('const [stackedMobile')){
- s=s.replace('const sorted=[...pages].sort', "const [stackedMobile,setStackedMobile]=React.useState(()=>window.matchMedia('(max-width:767px)').matches||new URLSearchParams(window.location.search).get('mobilePreview')==='1');React.useEffect(()=>{const mq=window.matchMedia('(max-width:767px)'),sync=()=>setStackedMobile(mq.matches||document.querySelector('.catalog-mobile-preview')!==null);mq.addEventListener('change',sync);return()=>mq.removeEventListener('change',sync)},[]);const sorted=[...pages].sort");
+ s=s.replace("const[pageId,setPageId]=React.useState", "const [stackedMobile,setStackedMobile]=React.useState(()=>window.matchMedia('(max-width:767px)').matches||new URLSearchParams(window.location.search).get('mobilePreview')==='1');React.useEffect(()=>{const mq=window.matchMedia('(max-width:767px)'),sync=()=>setStackedMobile(mq.matches||document.querySelector('.catalog-mobile-preview')!==null);mq.addEventListener('change',sync);return()=>mq.removeEventListener('change',sync)},[]);const[pageId,setPageId]=React.useState");
  const start=s.indexOf('<div className="flex-1 overflow-auto p-6 flex justify-center">');
  const end=s.indexOf('</main>',start);
  if(start<0||end<0)throw Error('Catalog canvas not found');
