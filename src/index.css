@@ -72,3 +72,6 @@
 
 @media(max-width:767px){.catalog-shell main{touch-action:pan-y}}
 .catalog-mobile-preview main{touch-action:pan-y}
+
+@media(max-width:767px){.catalog-shell .catalog-page-scroll>[data-catalog-page]{margin-bottom:24px;flex-shrink:0}.catalog-shell main{min-height:0}.catalog-shell .catalog-page-scroll{overscroll-behavior:contain}}
+.catalog-mobile-preview .catalog-page-scroll>[data-catalog-page]{margin-bottom:24px;flex-shrink:0}.catalog-mobile-preview main{min-height:0}
