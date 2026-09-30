@@ -1,5 +1,16 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { gunzipSync } from 'node:zlib';
+// Reproducible builds use the verified public snapshot. Explicit refresh reads the storefront only.
+const snapshotPath = new URL('./storefront-snapshot.json.gz', import.meta.url);
+if (process.env.CATALOG_REFRESH_DATA !== '1') {
+  const bytes = await fs.readFile(snapshotPath);
+  const data = gunzipSync(bytes);
+  await fs.mkdir(path.join(process.cwd(), 'public'), { recursive: true });
+  await fs.writeFile(path.join(process.cwd(), 'public', 'preview-products.json'), data);
+  console.log(`Verified catalog snapshot: ${JSON.parse(data).products.length} products`);
+  process.exit(0);
+}
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const { productFacts } = require('./storefront-data.cjs');
