@@ -1,4 +1,14 @@
-const {getValidSession}=require('./auth-utils.cjs');const {getUser}=require('./user-auth.js');
-function errorText(errors){if(!errors)return '';if(Array.isArray(errors))return errors.map(e=>e?.message||String(e)).join('; ');if(typeof errors==='string')return errors;if(typeof errors==='object')return errors.message||JSON.stringify(errors);return String(errors)}
-async function graphql(s,q,variables={}){const r=await fetch(`https://${s.shop}/admin/api/2026-07/graphql.json`,{method:'POST',headers:{'Content-Type':'application/json','X-Shopify-Access-Token':s.accessToken},body:JSON.stringify({query:q,variables})});const text=await r.text();let j;try{j=JSON.parse(text)}catch{throw new Error(`Shopify API returned non-JSON (${r.status})`)}if(!r.ok||j.errors){const e=new Error(errorText(j.errors)||`Shopify API error (${r.status})`);e.status=r.status;throw e;}return j.data}
-module.exports=async(req,res)=>{try{if(req.method!=='GET')return res.status(405).json({error:'Method not allowed'});if(!getUser(req))return res.status(401).json({error:'Dahili kullanıcı girişi gerekli.'});let s=await getValidSession(req,res);if(!s?.shop||!s?.accessToken)return res.status(401).json({error:'Shopify bağlantısı gerekli.'});const q=`query($after:String){collections(first:250,after:$after,sortKey:TITLE){nodes{id title handle descriptionHtml image{url}} pageInfo{hasNextPage endCursor}}}`;let after=null,items=[],hasNext=true;while(hasNext){let d;try{d=await graphql(s,q,{after})}catch(e){if(e.status===401&&s.refreshToken){s=await getValidSession(req,res,{forceRefresh:true});d=await graphql(s,q,{after})}else throw e;}items.push(...d.collections.nodes.map(c=>({id:c.id,name:c.title,handle:c.handle,image:c.image?.url||null,description:c.descriptionHtml||''})));hasNext=d.collections.pageInfo.hasNextPage;after=d.collections.pageInfo.endCursor}return res.status(200).json({collections:items})}catch(e){console.error(e);return res.status(e.code==='SHOPIFY_REAUTH_REQUIRED'?401:500).json({error:e.message||'Koleksiyonlar alınamadı.',reauthorize:e.code==='SHOPIFY_REAUTH_REQUIRED'})}};
+const { getUser } = require('./user-auth.js');
+const { getCatalogSource } = require('./catalog-source.cjs');
+module.exports = async (req, res) => {
+  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+  if (!getUser(req)) return res.status(401).json({ error: 'Dahili kullanıcı girişi gerekli.' });
+  try {
+    const data = getCatalogSource();
+    res.setHeader('Cache-Control', 'private, no-store');
+    return res.status(200).json({ collections: data.collections, generatedAt: data.generatedAt });
+  } catch (error) {
+    console.error('Catalog collection source unavailable:', error.message);
+    return res.status(502).json({ error: 'Koleksiyonlar alınamadı.' });
+  }
+};

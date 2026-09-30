@@ -1,0 +1,279 @@
+{
+  "categories": [
+    {
+      "id": "ozel-tektas-koleksiyonu",
+      "name": "Özel Tektaş Koleksiyonu"
+    },
+    {
+      "id": "pirlanta-yuzukler",
+      "name": "Pırlanta Yüzükler"
+    },
+    {
+      "id": "pirlanta-kolyeler",
+      "name": "Pırlanta Kolyeler"
+    },
+    {
+      "id": "pirlanta-kupeler",
+      "name": "Pırlanta Küpeler"
+    },
+    {
+      "id": "pirlanta-bileklikler",
+      "name": "Pırlanta Bileklikler"
+    },
+    {
+      "id": "koleksiyonlar",
+      "name": "Koleksiyonlar"
+    },
+    {
+      "id": "pirlanta-firsatlari",
+      "name": "Pırlanta Fırsatları"
+    }
+  ],
+  "collections": [
+    {
+      "id": "d-renk-pirlanta-tektas-yuzukler",
+      "name": "D Renk Pırlanta Tektaş Yüzükler",
+      "parentId": "ozel-tektas-koleksiyonu"
+    },
+    {
+      "id": "e-renk-pirlanta-tektas-yuzukler",
+      "name": "E Renk Pırlanta Tektaş Yüzükler",
+      "parentId": "ozel-tektas-koleksiyonu"
+    },
+    {
+      "id": "f-renk-pirlanta-tektas-yuzukler",
+      "name": "F Renk Pırlanta Tektaş Yüzükler",
+      "parentId": "ozel-tektas-koleksiyonu"
+    },
+    {
+      "id": "g-renk-pirlanta-tektas-yuzukler",
+      "name": "G Renk Pırlanta Tektaş Yüzükler",
+      "parentId": "ozel-tektas-koleksiyonu"
+    },
+    {
+      "id": "oval-tektas-pirlanta-yuzukler",
+      "name": "Oval Tektaş Pırlanta Yüzükler",
+      "parentId": "ozel-tektas-koleksiyonu"
+    },
+    {
+      "id": "0-30-karat-tektas-pirlanta-yuzuk",
+      "name": "0,30 Karat Tektaş Pırlanta Yüzük",
+      "parentId": "ozel-tektas-koleksiyonu"
+    },
+    {
+      "id": "0-40-karat-pirlanta-tektas-yuzuk",
+      "name": "0,40 Karat Tektaş Pırlanta Yüzük",
+      "parentId": "ozel-tektas-koleksiyonu"
+    },
+    {
+      "id": "0-50-karat-tektas-pirlanta-yuzuk",
+      "name": "0,50 Karat Tektaş Pırlanta Yüzük",
+      "parentId": "ozel-tektas-koleksiyonu"
+    },
+    {
+      "id": "0-60-karat-tektas-pirlanta-yuzuk",
+      "name": "0,60 Karat Tektaş Pırlanta Yüzük",
+      "parentId": "ozel-tektas-koleksiyonu"
+    },
+    {
+      "id": "0-70-karat-pirlanta-tektas-yuzuk",
+      "name": "0,70 Karat Pırlanta Tektaş Yüzük",
+      "parentId": "ozel-tektas-koleksiyonu"
+    },
+    {
+      "id": "0-90-karat-tektas-pirlanta-yuzuk",
+      "name": "0,90 Karat Tektaş Pırlanta Yüzük",
+      "parentId": "ozel-tektas-koleksiyonu"
+    },
+    {
+      "id": "1-00-karat-tektas-pirlanta-yuzuk",
+      "name": "1,00 Karat Tektaş Pırlanta Yüzük",
+      "parentId": "ozel-tektas-koleksiyonu"
+    },
+    {
+      "id": "tektas-pirlanta-yuzukler",
+      "name": "Tektaş Pırlanta Yüzükler",
+      "parentId": "pirlanta-yuzukler"
+    },
+    {
+      "id": "oval-tektas-pirlanta-yuzukler",
+      "name": "Oval Tektaş Pırlanta Yüzükler",
+      "parentId": "pirlanta-yuzukler"
+    },
+    {
+      "id": "baget-pirlanta-yuzukler",
+      "name": "Baget Pırlanta Yüzükler",
+      "parentId": "pirlanta-yuzukler"
+    },
+    {
+      "id": "coronet-pirlanta-yuzukler",
+      "name": "Coronet Pırlanta Yüzükler",
+      "parentId": "pirlanta-yuzukler"
+    },
+    {
+      "id": "tamtur-pirlanta-yuzukler",
+      "name": "Tamtur Pırlanta Yüzükler",
+      "parentId": "pirlanta-yuzukler"
+    },
+    {
+      "id": "bestas-pirlanta-yuzukler",
+      "name": "Beştaş Pırlanta Yüzükler",
+      "parentId": "pirlanta-yuzukler"
+    },
+    {
+      "id": "taktakistir-pirlanta-yuzukler",
+      "name": "Taktakıştır Pırlanta Yüzükler",
+      "parentId": "pirlanta-yuzukler"
+    },
+    {
+      "id": "tasarim-pirlanta-yuzukler",
+      "name": "Tasarım Pırlanta Yüzükler",
+      "parentId": "pirlanta-yuzukler"
+    },
+    {
+      "id": "renkli-tasli-pirlanta-yuzukler",
+      "name": "Renkli Taşlı Pırlanta Yüzükler",
+      "parentId": "pirlanta-yuzukler"
+    },
+    {
+      "id": "yarimtur-pirlanta-yuzukler",
+      "name": "Yarımtur Pırlanta Yüzükler",
+      "parentId": "pirlanta-yuzukler"
+    },
+    {
+      "id": "tektas-pirlanta-kolyeler",
+      "name": "Tektaş Pırlanta Kolyeler",
+      "parentId": "pirlanta-kolyeler"
+    },
+    {
+      "id": "baget-pirlanta-kolyeler",
+      "name": "Baget Pırlanta Kolyeler",
+      "parentId": "pirlanta-kolyeler"
+    },
+    {
+      "id": "coronet-pirlanta-kolyeler",
+      "name": "Coronet Pırlanta Kolyeler",
+      "parentId": "pirlanta-kolyeler"
+    },
+    {
+      "id": "tasarim-pirlanta-kolyeler",
+      "name": "Tasarım Pırlanta Kolyeler",
+      "parentId": "pirlanta-kolyeler"
+    },
+    {
+      "id": "harfli-pirlanta-kolyeler",
+      "name": "Harfli Pırlanta Kolyeler",
+      "parentId": "pirlanta-kolyeler"
+    },
+    {
+      "id": "ozel-kesim-tektas-pirlanta-kolyeler",
+      "name": "Özel Kesim Tektaş Pırlanta Kolyeler",
+      "parentId": "pirlanta-kolyeler"
+    },
+    {
+      "id": "su-yolu-pirlanta-gerdanlik",
+      "name": "Su Yolu Pırlanta Gerdanlıklar",
+      "parentId": "pirlanta-kolyeler"
+    },
+    {
+      "id": "pirlanta-gerdanliklar",
+      "name": "Pırlanta Gerdanlıklar",
+      "parentId": "pirlanta-kolyeler"
+    },
+    {
+      "id": "renkli-tasli-pirlanta-kolyeler",
+      "name": "Renkli Taşlı Pırlanta Kolyeler",
+      "parentId": "pirlanta-kolyeler"
+    },
+    {
+      "id": "tektas-pirlanta-kupeler",
+      "name": "Tektaş Pırlanta Küpeler",
+      "parentId": "pirlanta-kupeler"
+    },
+    {
+      "id": "baget-pirlanta-kupeler",
+      "name": "Baget Pırlanta Küpeler",
+      "parentId": "pirlanta-kupeler"
+    },
+    {
+      "id": "coronet-pirlanta-kupeler",
+      "name": "Coronet Pırlanta Küpeler",
+      "parentId": "pirlanta-kupeler"
+    },
+    {
+      "id": "halka-pirlanta-kupeler",
+      "name": "Halka Pırlanta Küpeler",
+      "parentId": "pirlanta-kupeler"
+    },
+    {
+      "id": "renkli-tasli-pirlanta-kupeler",
+      "name": "Renkli Taşlı Pırlanta Küpeler",
+      "parentId": "pirlanta-kupeler"
+    },
+    {
+      "id": "tasarim-pirlanta-kupeler",
+      "name": "Tasarım Pırlanta Küpeler",
+      "parentId": "pirlanta-kupeler"
+    },
+    {
+      "id": "ozel-kesim-tek-tas-pirlanta-kupeler",
+      "name": "Özel Kesim Tektaş Pırlanta Küpeler",
+      "parentId": "pirlanta-kupeler"
+    },
+    {
+      "id": "taktakistir-pirlanta-kupeler",
+      "name": "Taktakıştır Pırlanta Küpeler",
+      "parentId": "pirlanta-kupeler"
+    },
+    {
+      "id": "su-yolu-pirlanta-kupeler",
+      "name": "Su Yolu Pırlanta Küpeler",
+      "parentId": "pirlanta-kupeler"
+    },
+    {
+      "id": "baget-pirlanta-bileklikler",
+      "name": "Baget Pırlanta Bileklikler",
+      "parentId": "pirlanta-bileklikler"
+    },
+    {
+      "id": "su-yolu-pirlanta-bileklikler",
+      "name": "Su Yolu Pırlanta Bileklikler",
+      "parentId": "pirlanta-bileklikler"
+    },
+    {
+      "id": "tasarim-pirlanta-bileklikler",
+      "name": "Tasarım Pırlanta Bileklikler",
+      "parentId": "pirlanta-bileklikler"
+    },
+    {
+      "id": "renkli-tasli-pirlanta-bileklikler",
+      "name": "Renkli Taşlı Pırlanta Bileklikler",
+      "parentId": "pirlanta-bileklikler"
+    },
+    {
+      "id": "taktakistir-pirlanta-bileklikler",
+      "name": "Taktakıştır Pırlanta Bileklikler",
+      "parentId": "pirlanta-bileklikler"
+    },
+    {
+      "id": "baget-pirlanta-koleksiyonu",
+      "name": "Baget Pırlanta Koleksiyonu",
+      "parentId": "koleksiyonlar"
+    },
+    {
+      "id": "renkli-tasli-pirlanta-koleksiyonu",
+      "name": "Renkli Taşlı Pırlanta Koleksiyonu",
+      "parentId": "koleksiyonlar"
+    },
+    {
+      "id": "su-yolu-pirlanta-koleksiyonu",
+      "name": "Su Yolu Pırlanta Koleksiyonu",
+      "parentId": "koleksiyonlar"
+    },
+    {
+      "id": "surpriz-pirlanta-koleksiyonu",
+      "name": "Sürpriz Pırlanta Koleksiyonu",
+      "parentId": "koleksiyonlar"
+    }
+  ]
+}

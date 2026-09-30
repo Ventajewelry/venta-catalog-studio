@@ -1,1 +1,20 @@
-{"rewrites":[{"source":"/admin","destination":"/index.html"},{"source":"/admin/","destination":"/index.html"}]}
+{
+  "rewrites": [
+    {
+      "source": "/admin",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/admin/",
+      "destination": "/index.html"
+    }
+  ],
+  "functions": {
+    "api/products.js": {
+      "includeFiles": "scripts/storefront-snapshot.json.gz"
+    },
+    "api/collections.js": {
+      "includeFiles": "scripts/storefront-snapshot.json.gz"
+    }
+  }
+}
