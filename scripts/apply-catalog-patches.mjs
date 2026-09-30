@@ -216,3 +216,19 @@ console.log('VENTA Catalog Studio: product pool rendering guarded; Products tab 
   write(f,s);
  }
 }
+
+
+// Replace the former certificate control with the published stone-properties table.
+{
+ const f='src/components/studio/CatalogStudioV5.tsx'; let s=read(f);
+ if(!s.includes("import { StonePropertiesTable, stonePropertiesHtml }")) {
+  s="import { StonePropertiesTable, stonePropertiesHtml } from '../shared/StonePropertiesTable';\n"+s;
+ }
+ s=s.replaceAll('}/> Sertifika</label>', '}/> Taş özellikleri</label>');
+ s=s.replaceAll("showCertificate:' Sertifika'", "showCertificate:' Taş özellikleri'");
+ s=s.replace('{productInfo.showCertificate&&<div className="truncate whitespace-nowrap" style={styleFor(\'sku\')}>Sertifika: {p.certificate||\'—\'}</div>}', '{productInfo.showCertificate&&<StonePropertiesTable product={p} style={styleFor(\'sku\')}/>}');
+ const oldPdf='<small>\${p?.name||\'\'}<br/>\${p?.sku||\'\'}</small></div>';
+ const nextPdf='<small>\${p?.name||\'\'}<br/>\${p?.sku||\'\'}</small>\${({...settings.productInfo,...pg.style?.productInfoOverrides,...b.productInfo}).showCertificate?stonePropertiesHtml(p):\'\'}</div>';
+ s=s.replace(oldPdf,nextPdf);
+ write(f,s);
+}
