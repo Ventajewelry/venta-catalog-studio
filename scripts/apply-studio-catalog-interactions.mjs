@@ -130,3 +130,21 @@ const replaceIds=(ids:string[])=>{`);
   fs.writeFileSync(file,source);
  }
 }
+
+// Gold color, colored gems and stone cuts share the same product-data predicates.
+{
+ let source=fs.readFileSync(file,'utf8');
+ if(!source.includes('// Jewelry attribute filters')){
+  source="// Jewelry attribute filters\nimport { JewelryFilterControls, JewelryFilters, jewelryOptions, matchesJewelryFilters } from '../shared/catalogJewelryFilters';\n"+source;
+  const start=source.indexOf('function ProductsPanel('),end=source.indexOf('function PageSettingsPanel(',start);let panel=source.slice(start,end);
+  const change=(from,to)=>{if(!panel.includes(from))throw new Error('Jewelry filter anchor missing: '+from.slice(0,100));panel=panel.replace(from,to)};
+  change('const[selectedProducts,setSelectedProducts]', 'const[jewelry,setJewelry]=React.useState<JewelryFilters>({gold:[],gems:[],cuts:[]});const[selectedProducts,setSelectedProducts]');
+  change('const filtered=React.useMemo(', 'const jewelryChoices=React.useMemo(()=>jewelryOptions(products.filter(p=>matchesBrand(p,brand))),[products,brand]);const filtered=React.useMemo(');
+  change('if(!matchesBrand(p,brand))return false;', 'if(!matchesBrand(p,brand)||!matchesJewelryFilters(p,jewelry))return false;');
+  change('[brand,sortOrder,products,q', '[jewelry,brand,sortOrder,products,q');
+  change("setQ('');setCat('');", "setJewelry({gold:[],gems:[],cuts:[]});setQ('');setCat('');");
+  change("setBrand(value);setCat('');", "setBrand(value);setJewelry({gold:[],gems:[],cuts:[]});setCat('');");
+  change('<DiamondGradePicker label="Renk"', '<div className="col-span-2"><JewelryFilterControls options={jewelryChoices} value={jewelry} onChange={setJewelry}/></div><DiamondGradePicker label="Renk"');
+  source=source.slice(0,start)+panel+source.slice(end);fs.writeFileSync(file,source);
+ }
+}
