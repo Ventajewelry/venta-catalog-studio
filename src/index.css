@@ -75,3 +75,13 @@
 
 @media(max-width:767px){.catalog-shell .catalog-page-scroll>[data-catalog-page]{margin-bottom:24px;flex-shrink:0}.catalog-shell main{min-height:0}.catalog-shell .catalog-page-scroll{overscroll-behavior:contain}}
 .catalog-mobile-preview .catalog-page-scroll>[data-catalog-page]{margin-bottom:24px;flex-shrink:0}.catalog-mobile-preview main{min-height:0}
+
+
+.catalog-page-scroll[data-exporting="true"]>[data-catalog-page]{width:760px!important;min-width:760px;box-shadow:none;margin:0!important}
+.catalog-page-scroll[data-exporting="true"]>[data-catalog-page]>div{background-image:none!important}
+.catalog-touch-move{position:absolute;right:2px;top:2px;z-index:30;width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:#0f203ae8;color:white;border-radius:7px;font:20px Arial;touch-action:none;cursor:grab}
+.catalog-product-moving{opacity:.55}.catalog-drop-target{outline:3px solid #b79962!important}
+.mobile-text-controls input[type="range"]{flex:1;min-width:0;accent-color:#0f203a;min-height:40px}
+.mobile-text-controls .field,.mobile-page-settings>.field{font-size:14px!important;min-height:42px}
+@media(max-width:767px){.catalog-shell .catalog-mobile-nav{grid-template-columns:repeat(5,minmax(0,1fr))}.catalog-shell .catalog-mobile-nav button{font-size:9px;padding:4px 2px;gap:3px;line-height:1.2}.catalog-shell[data-mobile-panel="tools"]>.flex.h-screen>aside>div.sticky{display:none}.catalog-shell[data-mobile-panel="tools"]>.flex.h-screen>aside .grid-cols-2,.catalog-shell[data-mobile-panel="tools"]>.flex.h-screen>aside .grid-cols-3{grid-template-columns:minmax(0,1fr)}.catalog-shell .mobile-text-controls .field{width:100%}.catalog-shell .mobile-text-controls input[type="number"]{width:72px}.catalog-shell .mobile-text-controls input[type="color"]{width:64px}}
+.catalog-mobile-preview .catalog-mobile-nav{grid-template-columns:repeat(5,minmax(0,1fr))}.catalog-mobile-preview .catalog-mobile-nav button{font-size:9px;padding:4px 2px;gap:3px;line-height:1.2}.catalog-mobile-preview[data-mobile-panel="tools"]>.flex.h-screen>aside>div.sticky{display:none}.catalog-mobile-preview[data-mobile-panel="tools"]>.flex.h-screen>aside .grid-cols-2,.catalog-mobile-preview[data-mobile-panel="tools"]>.flex.h-screen>aside .grid-cols-3{grid-template-columns:minmax(0,1fr)}.catalog-mobile-preview .mobile-text-controls .field{width:100%}.catalog-mobile-preview .mobile-text-controls input[type="number"]{width:72px}.catalog-mobile-preview .mobile-text-controls input[type="color"]{width:64px}
