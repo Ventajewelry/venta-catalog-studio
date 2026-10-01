@@ -1,0 +1,23 @@
+import React from 'react';
+
+export function CatalogLogoControls({settings,onChange}:any){
+ const [error,setError]=React.useState('');
+ const readLogo=(file?:File)=>{if(!file)return;if(!file.type.startsWith('image/')){setError('Bir görsel seçin.');return;}if(file.size>2*1024*1024){setError('Logo en fazla 2 MB olabilir.');return;}const reader=new FileReader();reader.onload=()=>{onChange({headerLogoUrl:String(reader.result),showHeaderLogo:true});setError('')};reader.readAsDataURL(file)};
+ return <div className="border rounded-lg p-3 space-y-3"><label className="flex items-center gap-2 text-sm font-medium"><input type="checkbox" checked={settings.showHeaderLogo!==false} onChange={e=>onChange({showHeaderLogo:e.target.checked})}/>Üst bilgi logosu</label>{settings.showHeaderLogo!==false&&<><img src={settings.headerLogoUrl||'/venta-catalog-logo.svg'} alt="Venta logosu" className="h-10 max-w-full object-contain"/><label className="block text-xs">Hizalama<select className="field mt-1" value={settings.headerLogoAlign||'center'} onChange={e=>onChange({headerLogoAlign:e.target.value})}><option value="left">Sola yaslı</option><option value="center">Ortalı</option><option value="right">Sağa yaslı</option></select></label><label className="block text-xs">Logo değiştir<input className="field mt-1" type="file" accept="image/*" onChange={e=>readLogo(e.target.files?.[0])}/></label><button className="field" onClick={()=>onChange({headerLogoUrl:'/venta-catalog-logo.svg'})}>Venta logosuna dön</button></>}{error&&<p role="alert" className="text-xs text-red-600">{error}</p>}</div>
+}
+
+// Scale the complete caption together rather than pushing the table out of its card.
+export function FittedProductInfo({children}:React.PropsWithChildren){
+ const box=React.useRef<HTMLDivElement>(null),content=React.useRef<HTMLDivElement>(null);
+ const [fit,setFit]=React.useState({scale:1,height:0});
+ React.useLayoutEffect(()=>{const node=content.current,parent=box.current?.parentElement;if(!node||!parent)return;let frame=0;const update=()=>{cancelAnimationFrame(frame);frame=requestAnimationFrame(()=>{const natural=node.scrollHeight,width=box.current?.clientWidth||1;const scale=Math.min(1,(parent.clientHeight*.45)/Math.max(1,natural),width/Math.max(width,node.scrollWidth));const height=Math.ceil(natural*scale);setFit(old=>Math.abs(old.scale-scale)<.001&&old.height===height?old:{scale,height})})};const observer=new ResizeObserver(update);observer.observe(parent);observer.observe(node);update();return()=>{observer.disconnect();cancelAnimationFrame(frame)}},[children]);
+ return <div ref={box} className="catalog-fitted-info w-full shrink-0 relative overflow-hidden" style={{height:fit.height||undefined,maxHeight:'45%'}}><div ref={content} className="leading-tight p-1 w-full" style={{transform:`scale(${fit.scale})`,transformOrigin:'top left'}}>{children}</div></div>
+}
+
+// One finger keeps native scrolling; only two-finger gestures are intercepted.
+export function useCatalogPinch(enabled:boolean){
+ const [zoom,setZoom]=React.useState(1);
+ const areaRef=React.useRef<HTMLDivElement>(null);
+ React.useEffect(()=>{const node=areaRef.current;if(!enabled||!node)return;let gesture:{distance:number;zoom:number;midX:number;midY:number;left:number;top:number}|null=null;const distance=(t:TouchList)=>Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);const start=(e:TouchEvent)=>{if(e.touches.length!==2)return;e.preventDefault();const rect=node.getBoundingClientRect();gesture={distance:distance(e.touches),zoom:Number(node.dataset.zoom||1),midX:(e.touches[0].clientX+e.touches[1].clientX)/2-rect.left,midY:(e.touches[0].clientY+e.touches[1].clientY)/2-rect.top,left:node.scrollLeft,top:node.scrollTop}};const move=(e:TouchEvent)=>{if(!gesture||e.touches.length!==2)return;e.preventDefault();const next=Math.max(1,Math.min(3,gesture.zoom*distance(e.touches)/Math.max(1,gesture.distance))),ratio=next/gesture.zoom;setZoom(next);requestAnimationFrame(()=>{if(gesture){node.scrollLeft=(gesture.left+gesture.midX)*ratio-gesture.midX;node.scrollTop=(gesture.top+gesture.midY)*ratio-gesture.midY}})};const end=()=>{gesture=null};node.addEventListener('touchstart',start,{passive:false});node.addEventListener('touchmove',move,{passive:false});node.addEventListener('touchend',end);node.addEventListener('touchcancel',end);return()=>{node.removeEventListener('touchstart',start);node.removeEventListener('touchmove',move);node.removeEventListener('touchend',end);node.removeEventListener('touchcancel',end)}},[enabled]);
+ return {zoom,setZoom,areaRef};
+}

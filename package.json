@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
-    "build": "node scripts/apply-catalog-patches.mjs && node scripts/apply-diamond-mobile-patches.mjs && node scripts/apply-studio-mobile-usability.mjs && node scripts/apply-studio-grid-defaults.mjs && node scripts/generate-preview-products.mjs && vite build",
+    "build": "node scripts/apply-catalog-patches.mjs && node scripts/apply-diamond-mobile-patches.mjs && node scripts/apply-studio-mobile-usability.mjs && node scripts/apply-studio-grid-defaults.mjs && node scripts/apply-studio-catalog-interactions.mjs && node scripts/generate-preview-products.mjs && vite build",
     "preview": "vite preview",
     "lint": "tsc --noEmit"
   },
