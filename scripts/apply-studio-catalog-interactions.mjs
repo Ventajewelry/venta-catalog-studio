@@ -91,3 +91,18 @@ if(!s.includes('// Brand and continuation controls')){
  s=s.replace(local,local+'<CatalogLogoControls settings={{...settings,...page.style}} onChange={(patch:any)=>onPageStyle({...page.style,...patch})}/>');
  fs.writeFileSync(file,s);
 }
+
+// Product clicks select only; placement is requested by explicit add actions.
+{
+ let source=fs.readFileSync(file,'utf8');
+ if(!source.includes('const[selectedProducts,setSelectedProducts]')){
+  const start=source.indexOf('function ProductsPanel('),end=source.indexOf('function PageSettingsPanel(',start);
+  let panel=source.slice(start,end);
+  const replacePanel=(from,to)=>{if(!panel.includes(from))throw new Error('Product selection anchor missing: '+from);panel=panel.replace(from,to)};
+  replacePanel("const[q,setQ]=React.useState('')","const[selectedProducts,setSelectedProducts]=React.useState<Set<string>>(new Set());const[q,setQ]=React.useState('')");
+  replacePanel('checked={used.has(p.id)} onChange={e=>e.target.checked?onAddIds([p.id]):null}', 'checked={used.has(p.id)||selectedProducts.has(p.id)} onChange={()=>setSelectedProducts(current=>{const next=new Set(current);next.has(p.id)?next.delete(p.id):next.add(p.id);return next})}');
+  replacePanel('<button onClick={()=>onReplaceIds(filtered.map(p=>p.id))}', '<button disabled={!selectedProducts.size} onClick={()=>{onAddIds(products.filter(p=>selectedProducts.has(p.id)&&!used.has(p.id)).map(p=>p.id));setSelectedProducts(new Set())}} className="px-3 h-8 border text-[8px] disabled:opacity-30">Seçilenleri ekle ({selectedProducts.size})</button><button onClick={()=>{onReplaceIds(filtered.map(p=>p.id));setSelectedProducts(new Set())}}');
+  source=source.slice(0,start)+panel+source.slice(end);
+  fs.writeFileSync(file,source);
+ }
+}
