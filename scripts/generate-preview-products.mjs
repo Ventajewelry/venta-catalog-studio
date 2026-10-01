@@ -5,7 +5,10 @@ import { gunzipSync } from 'node:zlib';
 const snapshotPath = new URL('./storefront-snapshot.json.gz', import.meta.url);
 if (process.env.CATALOG_REFRESH_DATA !== '1') {
   const bytes = await fs.readFile(snapshotPath);
-  const data = gunzipSync(bytes);
+  const snapshot=JSON.parse(gunzipSync(bytes).toString('utf8'));
+  const dates=JSON.parse(await fs.readFile(new URL('./product-created-dates.json',import.meta.url),'utf8'));
+  snapshot.products=snapshot.products.map(product=>({...product,createdAt:product.createdAt||(dates[product.id]?new Date(dates[product.id]).toISOString():undefined)}));
+  const data = JSON.stringify(snapshot);
   await fs.mkdir(path.join(process.cwd(), 'public'), { recursive: true });
   await fs.writeFile(path.join(process.cwd(), 'public', 'preview-products.json'), data);
   console.log(`Verified catalog snapshot: ${JSON.parse(data).products.length} products`);
@@ -51,6 +54,7 @@ const normalized = products.map((product) => {
   const match = `${product.title || ''} ${product.product_type || ''} ${(product.tags || []).join(' ')}`.match(/(\d+(?:[,.]\d+)?)\s*(?:karat|ct)\b/i);
   return {
     id: String(product.id),
+    createdAt: product.created_at,
     name: product.title || 'İsimsiz ürün',
     sku: variant.sku || '',
     price: Number(variant.price || 0),
