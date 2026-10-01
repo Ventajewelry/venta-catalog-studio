@@ -16,6 +16,7 @@ export function continueCatalogProducts(pages:Page[],targetId:string,requested:s
   });
   return changed?{...p,content:{...p.content,blocks,productIds:blocks.filter(b=>b.frameKind==='product'&&b.productId).map(b=>b.productId!)}}:p;
  });
- while(queue.length)next.push(makePage(ordered[start],queue.splice(0,4)));
+ const pageIds=new Set(next.map(page=>page.id));
+ while(queue.length){const made=makePage(ordered[start],queue.splice(0,4));let id=made.id;while(pageIds.has(id))id=crypto.randomUUID();pageIds.add(id);next.push({...made,id});}
  return next.map((p,order)=>({...p,order}));
 }
