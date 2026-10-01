@@ -106,3 +106,27 @@ if(!s.includes('// Brand and continuation controls')){
   fs.writeFileSync(file,source);
  }
 }
+
+// Shared desktop/mobile settings, first insertion and per-card manual captions.
+{
+ let source=fs.readFileSync(file,'utf8');
+ if(!source.includes('// Manual catalog captions')){
+  const change=(from,to)=>{if(!source.includes(from))throw new Error('Manual caption anchor missing: '+from.slice(0,100));source=source.replace(from,to)};
+  source="// Manual catalog captions\nimport { firstEmptyCatalogPage, resetCatalogFields, resolveCatalogProduct, CatalogField } from '../shared/catalogManualFields';\nimport { ManualProductFields } from './ManualProductFields';\n"+source;
+  change('const replaceIds=(ids:string[])=>{',`const requestProducts=(ids:string[])=>{if(!ids.length)return;const empty=firstEmptyCatalogPage(sorted);if(empty){save(continueCatalogProducts(sorted.map(pg=>pg.id===empty.id?{...pg,content:{productIds:[],blocks:[]}}:pg),empty.id,ids,(base,chunk)=>applyWithSettings({...base,title:'Ürünler'},'LAYOUT_C_PRODUCT_GRID',settings.productInfoDefaults)));setPageId(empty.id)}else setPendingProducts(ids)};
+const resetFields=(local:boolean,field?:CatalogField,automatic=true)=>{if(!local)onUpdateCatalog({settings:{...settings,productInfoDefaults:{...settings.productInfoDefaults,automaticFields:field?{...settings.productInfoDefaults?.automaticFields,[field]:automatic}:{name:true,sku:true,price:true,color:true,clarity:true,stoneDetails:true,stone:true,properties:true}}}});save(resetCatalogFields(sorted,local?page?.id:undefined,field,automatic))};
+const replaceIds=(ids:string[])=>{`);
+  change('onAddIds={ids=>setPendingProducts(ids)} onReplaceIds={replaceIds}', 'onAddIds={requestProducts} onReplaceIds={requestProducts}');
+  const from=source.indexOf("{panel==='page'&&page&&"),to=source.indexOf('</aside>',from);
+  if(from<0||to<0)throw new Error('Shared settings panel missing');
+  source=source.slice(0,from)+`{panel==='page'&&page&&<MobilePageSettings page={page} settings={settings} onSettings={updateSettings} onPageStyle={updatePageStyle} onUpdateInfo={updateProductInfo} onResetFields={resetFields}/>} `+source.slice(to);
+  change('const p=b.productId?products.find(x=>x.id===b.productId):null;', 'let p=b.productId?products.find(x=>x.id===b.productId):null;');
+  change('const styleFor=(part:', 'if(p)p=resolveCatalogProduct(p,b,productInfo);const styleFor=(part:');
+  change('onRemove?:()=>void}){const prod=', 'onRemove?:()=>void;info:ProductInfoSettings}){const prod=');
+  change('function Inspector({page,block,products,onPatch,onRemove}:', 'function Inspector({page,block,products,onPatch,onRemove,info}:');
+  change('{prod&&<div className="border p-2 text-[8px]">', '{prod&&block.frameKind===\'product\'&&<ManualProductFields block={block} product={prod} info={info} onPatch={onPatch} onReset={()=>onPatch({manualFields:undefined,productInfo:{...info,automaticFields:{name:true,sku:true,price:true,color:true,clarity:true,stoneDetails:true,stone:true,properties:true}},})}/>} {prod&&<div className="border p-2 text-[8px]">');
+  change('<Inspector page={page} block={b} products={products}', '<Inspector page={page} block={b} products={products} info={{...infoDefaults,...b.productInfo,...page.style?.productInfoOverrides,automaticFields:{...b.productInfo?.automaticFields,...page.style?.productInfoOverrides?.automaticFields}}}');
+  change('const productInfo={...infoDefaults,...b.productInfo,...page?.style?.productInfoOverrides};', 'const productInfo={...infoDefaults,...b.productInfo,...page?.style?.productInfoOverrides,automaticFields:{...b.productInfo?.automaticFields,...page?.style?.productInfoOverrides?.automaticFields}};');
+  fs.writeFileSync(file,source);
+ }
+}

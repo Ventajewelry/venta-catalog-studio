@@ -1,3 +1,4 @@
+import type { AutomaticFields, ManualFields } from './components/shared/catalogManualFields';
 export type LayoutId=
   |'LAYOUT_A_FULL_BLEED'|'LAYOUT_B_HERO_PRODUCT'|'LAYOUT_C_PRODUCT_GRID'|'LAYOUT_D_ASYMMETRIC'
   |'LAYOUT_E_HERO_DETAILS'|'LAYOUT_F_TWO_UP'|'LAYOUT_G_THREE_UP'|'LAYOUT_H_TYPOGRAPHIC'
@@ -7,8 +8,9 @@ export type LayoutId=
   |'LAYOUT_S_MAGAZINE'|'LAYOUT_T_PRODUCT_INDEX'|'COVER'|'BACK_COVER';
 export type PageBlockType='image'|'product'|'text'|'frame';
 export type TextStyleSettings={fontSize?:number;fontWeight?:300|400|500|600;color?:string;align?:'left'|'center'|'right'};
-export interface ProductInfoSettings{showName:boolean;showSku:boolean;showPrice:boolean;showMaterial:boolean;showCategory:boolean;showDescription:boolean;showColor?:boolean;showClarity?:boolean;showCertificate?:boolean;showStone?:boolean;showProperties?:boolean;position:'below'|'overlay'|'left'|'right';align:'left'|'center'|'right';fontFamily?:string;fontSize?:number;color?:string;pricePrefix?:string;lineGap?:number;discountPercent?:number;nameStyle?:TextStyleSettings;skuStyle?:TextStyleSettings;priceStyle?:TextStyleSettings;metaStyle?:TextStyleSettings;}
+export interface ProductInfoSettings{automaticFields?:AutomaticFields;showName:boolean;showSku:boolean;showPrice:boolean;showMaterial:boolean;showCategory:boolean;showDescription:boolean;showColor?:boolean;showClarity?:boolean;showCertificate?:boolean;showStone?:boolean;showProperties?:boolean;position:'below'|'overlay'|'left'|'right';align:'left'|'center'|'right';fontFamily?:string;fontSize?:number;color?:string;pricePrefix?:string;lineGap?:number;discountPercent?:number;nameStyle?:TextStyleSettings;skuStyle?:TextStyleSettings;priceStyle?:TextStyleSettings;metaStyle?:TextStyleSettings;}
 export interface PageBlock{
+  manualFields?:ManualFields;
   id:string; type:PageBlockType; url?:string; productId?:string; linkUrl?:string; showQr?:boolean; alt?:string;
   x?:number;y?:number;width?:number;height?:number;zIndex?:number;objectFit?:'cover'|'contain';
   imageScale?:number; imagePositionX?:number; imagePositionY?:number;
@@ -36,3 +38,4 @@ export interface Page{
     gridSize?:number;gridVisible?:boolean;gridSnap?:boolean;gridLocked?:boolean;headerWidth?:number;headerHeight?:number;footerWidth?:number;footerHeight?:number;gridGapHorizontal?:number;gridGapVertical?:number;gridInsetLeft?:number;gridInsetRight?:number;gridInsetTop?:number;gridInsetBottom?:number;productInfoOverrides?:Partial<ProductInfoSettings>;headerFontSize?:number;headerFontWeight?:300|400|500|600;headerColor?:string;footerFontSize?:number;footerFontWeight?:300|400|500|600;footerColor?:string;}
 }
 export interface Hotspot{productId:string;x:number;y:number}
+
