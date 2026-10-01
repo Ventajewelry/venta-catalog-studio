@@ -67,3 +67,27 @@ if(!s.includes("from './StudioActions'")){
  s=s.slice(0,actionStart)+'<StudioActions undo={undo} canUndo={!!history.length} clear={clearCatalog} pdf={exportPdf} exporting={exportingAll} preview={onPreview} saveDraft={onSaveDraft} loadDraft={onLoadDraft} publish={canPublish?onPublish:undefined}/>'+s.slice(end);
  fs.writeFileSync(file,s);
 }
+
+// Brand filtering and continuation are additive; Venta remains the initial source.
+s=fs.readFileSync(file,'utf8');
+if(!s.includes('// Brand and continuation controls')){
+ s="// Brand and continuation controls\nimport { CatalogBrandSelect, CatalogBrand, matchesBrand } from '../shared/catalogBrands';\nimport { continueCatalogProducts } from '../shared/continueCatalogProducts';\n"+s;
+ const start=s.indexOf('function ProductsPanel'),end=s.indexOf('function PageSettingsPanel',start);
+ let panel=s.slice(start,end);
+ panel=panel.replace("{const[sortOrder", "{const[brand,setBrand]=React.useState<CatalogBrand>('venta');const[sortOrder");
+ panel=panel.replace('products.filter(p=>{const search=', 'products.filter(p=>{if(!matchesBrand(p,brand))return false;const search=');
+ panel=panel.replace('[sortOrder,products,q,cat', '[brand,sortOrder,products,q,cat');
+ panel=panel.replace('categories.map(c=>', 'categories.filter(c=>matchesBrand(c,brand)).map(c=>');
+ panel=panel.replace('collections.filter(c=>!cat', 'collections.filter(c=>matchesBrand(c,brand)).filter(c=>!cat');
+ panel=panel.replace('<input className="field" placeholder="Ürün adı / SKU / arama"', '<div className="w-[42%] shrink-0"><CatalogBrandSelect value={brand} onChange={value=>{setBrand(value);setCat(\'\');setCol(\'\')}}/></div><input className="field min-w-0 flex-1" placeholder="Ürün adı / SKU / arama"');
+ if(!panel.includes('matchesBrand(p,brand)')||!panel.includes('value={brand}'))throw new Error('Brand filter anchor missing');
+ s=s.slice(0,start)+panel+s.slice(end);
+ s=s.replace('const addToNewPage=', "const continueIds=(ids:string[])=>{save(continueCatalogProducts(sorted,page?.id||'',ids,(base,chunk)=>applyWithSettings({...base,id:uid(),title:'Ürünler',style:undefined,content:{productIds:chunk}},'LAYOUT_C_PRODUCT_GRID')));setPendingProducts(null)};const addToNewPage=");
+ const cancel='<button className="field" onClick={()=>setPendingProducts(null)}>Vazgeç</button>';
+ if(!s.includes(cancel))throw new Error('Continue action anchor missing');
+ s=s.replace(cancel,'<button className="field" onClick={()=>continueIds(pendingProducts)}>Devam et · boş kartları doldur</button>'+cancel);
+ const local='<div className="text-[9px] mb-2">Geçerli sayfa</div>';
+ if(!s.includes(local))throw new Error('Current page logo anchor missing');
+ s=s.replace(local,local+'<CatalogLogoControls settings={{...settings,...page.style}} onChange={(patch:any)=>onPageStyle({...page.style,...patch})}/>');
+ fs.writeFileSync(file,s);
+}

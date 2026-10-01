@@ -8,6 +8,8 @@ if (process.env.CATALOG_REFRESH_DATA !== '1') {
   const snapshot=JSON.parse(gunzipSync(bytes).toString('utf8'));
   const dates=JSON.parse(await fs.readFile(new URL('./product-created-dates.json',import.meta.url),'utf8'));
   snapshot.products=snapshot.products.map(product=>({...product,createdAt:product.createdAt||(dates[product.id]?new Date(dates[product.id]).toISOString():undefined)}));
+  const larien=JSON.parse(gunzipSync(await fs.readFile(new URL('./larien-snapshot.json.gz',import.meta.url))).toString('utf8'));
+  snapshot.products.push(...larien.products);snapshot.categories.push(...larien.categories);snapshot.collections.push(...larien.collections);
   const data = JSON.stringify(snapshot);
   await fs.mkdir(path.join(process.cwd(), 'public'), { recursive: true });
   await fs.writeFile(path.join(process.cwd(), 'public', 'preview-products.json'), data);
