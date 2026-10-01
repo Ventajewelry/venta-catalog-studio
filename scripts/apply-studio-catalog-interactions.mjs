@@ -53,3 +53,17 @@ const exportPdf=`);
  replace("const updatePageStyle=(style:NonNullable<Page['style']>)=>save(sorted.map(p=>p.id===page.id?{...p,style}:p));", `const updatePageStyle=(style:NonNullable<Page['style']>&{productCardGap?:number})=>save(sorted.map(p=>{if(p.id!==page.id)return p;const c=cfg(p.layoutId);if(style.productCardGap===undefined||c.kind!=='grid')return {...p,style};const gap=Math.max(0,Math.min(8,style.productCardGap)),cols=c.cols||2,rows=c.rows||1,w=(90-gap*(cols-1))/cols,h=(82-gap*(rows-1))/rows;let i=0;return {...p,style,content:{...p.content,blocks:(p.content.blocks||[]).map(b=>{if(b.type==='text'||(b.frameKind!=='product'&&b.frameKind!=='empty'))return b;const n=i++;return {...b,x:5+(n%cols)*(w+gap),y:10+Math.floor(n/cols)*(h+gap),width:w,height:h}})}}}));`);
  fs.writeFileSync(file,marker+'\n'+s);
 }
+
+// Catalog menu shares the existing handlers; drafts are managed by the admin app.
+s=fs.readFileSync(file,'utf8');
+if(!s.includes("from './StudioActions'")){
+ s="import { StudioActions } from './StudioActions';\n"+s;
+ s=s.replace('type Props={', 'type Props={onSaveDraft?:()=>void;onLoadDraft?:()=>void;');
+ s=s.replace('export function CatalogStudioV5({', 'export function CatalogStudioV5({onSaveDraft,onLoadDraft,');
+ const start=s.indexOf('<header className="h-14');
+ const actionStart=s.indexOf('<div className="flex gap-2"><button onClick={undo}',start);
+ const end=s.indexOf('</header>',actionStart);
+ if(start<0||actionStart<0||end<0)throw new Error('Studio menu action anchor missing');
+ s=s.slice(0,actionStart)+'<StudioActions undo={undo} canUndo={!!history.length} clear={clearCatalog} pdf={exportPdf} exporting={exportingAll} preview={onPreview} saveDraft={onSaveDraft} loadDraft={onLoadDraft} publish={canPublish?onPublish:undefined}/>'+s.slice(end);
+ fs.writeFileSync(file,s);
+}
