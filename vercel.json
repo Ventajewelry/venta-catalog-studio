@@ -11,10 +11,10 @@
   ],
   "functions": {
     "api/products.js": {
-      "includeFiles": "scripts/*snapshot.json.gz"
+      "includeFiles": "scripts/storefront-snapshot.json.gz"
     },
     "api/collections.js": {
-      "includeFiles": "scripts/*snapshot.json.gz"
+      "includeFiles": "scripts/storefront-snapshot.json.gz"
     }
   }
 }
