@@ -148,3 +148,15 @@ const replaceIds=(ids:string[])=>{`);
   source=source.slice(0,start)+panel+source.slice(end);fs.writeFileSync(file,source);
  }
 }
+// Per-card product image controls
+{
+ const file='src/components/studio/CatalogStudioV5.tsx';
+ let source=fs.readFileSync(file,'utf8');
+ if(!source.includes('// Per-card product image controls')){
+  source="// Per-card product image controls\nimport { ProductImageControls, productImageTransform } from './ProductImageControls';\n"+source;
+  const replaceImage=(from,to)=>{if(!source.includes(from))throw new Error('Product image patch missing: '+from);source=source.replace(from,to)};
+  replaceImage("{prod&&block.frameKind==='product'&&<ManualProductFields", "{prod&&block.frameKind==='product'&&<ProductImageControls block={block} onPatch={onPatch}/>} {prod&&block.frameKind==='product'&&<ManualProductFields");
+  replaceImage('<img src={p.images[0]} className="catalog-product-image w-[92%] flex-1 min-h-0 object-contain"/>', '<div className="relative w-[92%] flex-1 min-h-0 overflow-hidden"><img draggable={false} src={p.images[0]} className="catalog-product-image absolute inset-0 w-full h-full object-contain pointer-events-none" style={{transform:productImageTransform(b),transformOrigin:"center center"}}/></div>');
+  fs.writeFileSync(file,source);
+ }
+}
