@@ -194,3 +194,27 @@ const replaceIds=(ids:string[])=>{`);
   source="// Immediate product selection and empty catalog start\nimport { selectedCatalogIds, selectCatalogProducts } from '../shared/catalogLiveSelection';\n"+source;fs.writeFileSync(file,source);
  }
 }
+
+// Desktop/tablet viewing controls do not change saved catalog geometry.
+{
+ let source=fs.readFileSync(file,'utf8');
+ if(!source.includes('// Resizable studio viewport')){
+ const change=(from,to)=>{if(!source.includes(from))throw new Error('Viewport anchor missing: '+from);source=source.replace(from,to)};
+ source="// Resizable studio viewport\nimport { useStudioViewport, StudioViewControls, StudioPanelHandle, StudioViewportStyles } from './StudioViewport';\n"+source;
+ change('const pageDrag=React.useRef', 'const viewport=useStudioViewport(areaRef,catalog.settings?.pageWidth||210,catalog.settings?.pageHeight||297);const stackedPages=stackedMobile||viewport.tablet;const pageDrag=React.useRef');
+ change('<aside className="w-56 bg-white border-r flex flex-col">','<aside style={!stackedMobile?{width:viewport.left,flexShrink:0}:undefined} className="w-56 bg-white border-r flex flex-col">');
+ change('</aside><main','</aside><StudioPanelHandle side="left" onPointerDown={e=>viewport.drag(\'left\',e)}/><main');
+ change('</main><aside className="w-[430px] bg-white border-l overflow-auto">','</main><StudioPanelHandle side="right" onPointerDown={e=>viewport.drag(\'right\',e)}/><aside style={!stackedMobile?{width:viewport.right,flexShrink:0}:undefined} className="w-[430px] bg-white border-l overflow-auto">');
+ change('<StudioActions undo=', '<div className="flex items-center gap-2"><StudioViewportStyles/><StudioViewControls view={viewport}/><StudioActions undo=');
+ change('publish={canPublish?onPublish:undefined}/></header>', 'publish={canPublish?onPublish:undefined}/></div></header>');
+ change("style={exportingAll?{display:", "style={exportingAll?{display:");
+ change('}:stackedMobile?{display:"block"}:undefined}', '}:stackedMobile?{display:"block"}:{display:"block"}}');
+ change("*zoom:'min(760px,70vw)',aspectRatio:", "*zoom:exportingAll?'min(760px,70vw)':stackedMobile?'min(760px,70vw)':viewport.width,aspectRatio:");
+ change('stackedMobile||exportingAll?sorted', 'stackedPages||exportingAll?sorted');
+ change('if(!stackedMobile||exportingAll)return;const root=', 'if(!stackedPages||exportingAll)return;const root=');
+ change('if(stackedMobile&&page.id!==pageId)', 'if(stackedPages&&page.id!==pageId)');
+ change('if(stackedMobile){document.querySelector', 'if(stackedPages){document.querySelector');
+ change('if(!stackedMobile)swipeEnd(e)', 'if(!stackedPages)swipeEnd(e)');
+ fs.writeFileSync(file,source);
+ }
+}
