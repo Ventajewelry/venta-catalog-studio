@@ -201,7 +201,7 @@ const replaceIds=(ids:string[])=>{`);
  if(!source.includes('// Resizable studio viewport')){
  const change=(from,to)=>{if(!source.includes(from))throw new Error('Viewport anchor missing: '+from);source=source.replace(from,to)};
  source="// Resizable studio viewport\nimport { useStudioViewport, StudioViewControls, StudioPanelHandle, StudioViewportStyles } from './StudioViewport';\n"+source;
- change('const pageDrag=React.useRef', 'const viewport=useStudioViewport(areaRef,catalog.settings?.pageWidth||210,catalog.settings?.pageHeight||297);const stackedPages=stackedMobile||viewport.tablet;const pageDrag=React.useRef');
+ change('const pageDrag=React.useRef', 'const viewport=useStudioViewport(areaRef,catalog.settings?.pageWidth||210,catalog.settings?.pageHeight||297);const stackedPages=true;const pageDrag=React.useRef');
  change('<aside className="w-56 bg-white border-r flex flex-col">','<aside style={!stackedMobile?{width:viewport.left,flexShrink:0}:undefined} className="w-56 bg-white border-r flex flex-col">');
  change('</aside><main','</aside><StudioPanelHandle side="left" onPointerDown={e=>viewport.drag(\'left\',e)}/><main');
  change('</main><aside className="w-[430px] bg-white border-l overflow-auto">','</main><StudioPanelHandle side="right" onPointerDown={e=>viewport.drag(\'right\',e)}/><aside style={!stackedMobile?{width:viewport.right,flexShrink:0}:undefined} className="w-[430px] bg-white border-l overflow-auto">');
