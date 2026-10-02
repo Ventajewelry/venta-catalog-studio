@@ -27,3 +27,21 @@ export function catalogSelectableProducts<T extends Item>(products:T[],pages:Pag
 }
 export function larienVariants<T extends Item>(products:T[],product:T){return products.filter(p=>isLarienModel(p)&&larienModelKey(p)===larienModelKey(product))}
 export function chooseLarienVariant<T extends Item>(variants:T[],current:T,karat:number,material:string){return variants.find(p=>p.id===current.id&&variantKarat(p)===karat&&p.material===material)||variants.find(p=>variantKarat(p)===karat&&p.material===material)}
+export function ventaVariants<T extends Item>(products:T[],product:T){const key=ventaModelKey(product)?.key;return key?products.filter(p=>ventaModelKey(p)?.key===key):[]}
+export const ventaGrades=(p:Item)=>String(p.sku||'').toUpperCase().match(/([DEFG])(SI1|SI2|VS2)$/)?.slice(1)||[];
+export function duplicateVariantBlocks(products:Item[],pages:Page[]){
+ const byId=new Map(products.map(p=>[p.id,p])),groups=new Map<string,string[]>();
+ for(const page of pages)for(const block of page.content.blocks||[]){if(block.frameKind!=='product'||!block.productId)continue;const product=byId.get(block.productId);if(!product||(!ventaModelKey(product)&&!isLarienModel(product)))continue;const key=isLarienModel(product)?'larien:'+product.id:'venta:'+ventaModelKey(product)!.key+'-'+ventaGrades(product).join('');groups.set(key,[...(groups.get(key)||[]),page.id+':'+block.id])}
+ return new Set([...groups.values()].filter(ids=>ids.length>1).flat());
+}
+export function duplicateCatalogCard(pages:Page[],pageId:string,blockId:string,makePage:(base:Page,id:string)=>Page){
+ const ordered=[...pages].sort((a,b)=>a.order-b.order),start=ordered.findIndex(p=>p.id===pageId),base=ordered[start];
+ const source=base?.content.blocks?.find(b=>b.id===blockId);if(!source?.productId)return null;
+ for(let i=start;i<ordered.length;i++){const target=ordered[i],slot=target.content.blocks?.find(b=>(b.frameKind==='empty'||b.frameKind==='product')&&!b.productId&&b.type!=='text');if(!slot)continue;
+ const blocks=target.content.blocks!.map(b=>b.id===slot.id?{...source,id:b.id,x:b.x,y:b.y,width:b.width,height:b.height}:b);
+ ordered[i]={...target,content:{...target.content,blocks,productIds:blocks.filter(b=>b.frameKind==='product'&&b.productId).map(b=>b.productId!)}};
+ return {pages:ordered,pageId:target.id,blockId:slot.id};
+ }
+ const next=makePage(base,source.productId),slot=next.content.blocks?.find(b=>b.productId===source.productId);if(!slot)return null;
+ ordered.push({...next,order:ordered.length});return {pages:ordered,pageId:next.id,blockId:slot.id};
+}

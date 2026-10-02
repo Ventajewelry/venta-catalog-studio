@@ -238,3 +238,23 @@ const replaceIds=(ids:string[])=>{`);
  fs.writeFileSync(file,source);
  }
 }
+
+// Explicit copies and per-card Venta grades stay inside the existing page grid.
+{
+ let source=fs.readFileSync(file,'utf8');
+ if(!source.includes('// Catalog card variants')){
+ const change=(from,to)=>{if(!source.includes(from))throw new Error('Card variant anchor missing: '+from);source=source.replace(from,to)};
+ source="// Catalog card variants\nimport { duplicateVariantBlocks, duplicateCatalogCard } from '../shared/catalogModelSelection';\nimport { VentaVariantControls } from './VentaVariantControls';\n"+source;
+ change('const pageDrag=React.useRef', 'const duplicateBlocks=React.useMemo(()=>duplicateVariantBlocks(products,pages),[products,pages]);const pageDrag=React.useRef');
+ change('const patch=', "const duplicateCard=(id:string)=>{const result=duplicateCatalogCard(sorted,page.id,id,(base,pid)=>applyWithSettings({...base,id:uid(),title:'Ürünler',content:{productIds:[pid]}},'LAYOUT_C_PRODUCT_GRID'));if(result){save(result.pages);setPageId(result.pageId);setBlockId(result.blockId);setPanel('element')}};const patch=");
+ change('onRemove,info,onAutomatic,onResetFields}:', 'onRemove,info,onAutomatic,onResetFields,onDuplicate}:');
+ change('onResetFields:()=>void}){const prod=', 'onResetFields:()=>void;onDuplicate:()=>void}){const prod=');
+ change('onResetFields={()=>resetFields(true)} onRemove=', 'onResetFields={()=>resetFields(true)} onDuplicate={()=>duplicateCard(b.id)} onRemove=');
+ change('<LarienVariantControls product={prod} products={products} onPatch={onPatch}/>', '<LarienVariantControls product={prod} products={products} onPatch={onPatch} onDuplicate={onDuplicate}/>');
+ change("{prod&&block.frameKind==='product'&&<LarienVariantControls", "{prod&&block.frameKind==='product'&&<VentaVariantControls product={prod} products={products} onPatch={onPatch} onDuplicate={onDuplicate}/>} {prod&&block.frameKind==='product'&&<LarienVariantControls");
+ change('productIds:p.productId?(pg.content.productIds||[]).map(pid=>pid===current?.productId?p.productId!:pid):pg.content.productIds', "productIds:(pg.content.blocks||[]).map(b=>b.id===id?{...b,...p}:b).filter(b=>b.frameKind==='product'&&b.productId).map(b=>b.productId!)");
+ change('borderColor:(page.style as any)?.productBorderColor', "outline:!exportingAll&&duplicateBlocks.has(page.id+':'+b.id)?'2px solid #dc2626':undefined,outlineOffset:-2,borderColor:(page.style as any)?.productBorderColor");
+ change('onRemove={()=>b.productId&&removeProduct(b.productId)}', "onRemove={()=>{if(duplicateBlocks.has(page.id+':'+b.id))patch(b.id,{frameKind:'empty',productId:undefined});else b.productId&&removeProduct(b.productId)}}");
+ fs.writeFileSync(file,source);
+ }
+}
