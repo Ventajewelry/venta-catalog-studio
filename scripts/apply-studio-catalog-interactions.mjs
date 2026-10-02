@@ -174,3 +174,23 @@ const replaceIds=(ids:string[])=>{`);
   fs.writeFileSync(file,'// Card automatic fields synced with current page\n'+source);
  }
 }
+
+// Immediate product selection and empty catalog start
+{
+ const file='src/components/studio/CatalogStudioV5.tsx';let source=fs.readFileSync(file,'utf8');
+ if(!source.includes('// Immediate product selection and empty catalog start')){
+  const change=(from,to)=>{if(!source.includes(from))throw new Error('Live selection patch missing: '+from);source=source.replace(from,to)};
+  change("const sorted=[...pages].sort((a,b)=>a.order-b.order);const [stackedMobile", "const blank:Page={id:'catalog-empty-start',catalogId:catalog.id,order:0,title:'Ürünler',layoutId:'LAYOUT_C_PRODUCT_GRID',content:{productIds:[],blocks:[]}};const sorted=(pages.length?[...pages]:[blank]).sort((a,b)=>a.order-b.order);const [stackedMobile");
+  change('{sorted.map((p,i)=><div key={p.id}', '{pages.length===0&&<p className="p-3 text-xs opacity-60">Ürün seçtikçe sayfalar oluşur.</p>}{pages.map((p,i)=><div key={p.id}');
+  change('{(stackedMobile||exportingAll?sorted:page?[page]:[])', '{(pages.length===0?[]:stackedMobile||exportingAll?sorted:page?[page]:[])');
+  change('const requestProducts=', "const liveProducts=(ids:string[],checked=true)=>{const next=selectCatalogProducts(pages,ids,checked,blank,(base,chunk)=>applyWithSettings({...base,id:uid(),title:'Ürünler',content:{productIds:chunk}},'LAYOUT_C_PRODUCT_GRID',settings.productInfoDefaults));save(next);if(!next.some(pg=>pg.id===pageId))setPageId(next[0]?.id||blank.id);setBlockId(null)};const requestProducts=");
+  change('onAddIds={requestProducts} onReplaceIds={requestProducts}', 'catalogPages={pages} onToggle={(id,checked)=>liveProducts([id],checked)} onAddIds={liveProducts} onReplaceIds={liveProducts}');
+  change('function ProductsPanel({page,products,', 'function ProductsPanel({catalogPages,onToggle,page,products,');
+  change('onReplaceIds}:{page:Page;', 'onReplaceIds}:{catalogPages:Page[];onToggle:(id:string,checked:boolean)=>void;page:Page;');
+  change('const used=new Set(page.content.productIds||[])', 'const used=new Set(selectedCatalogIds(catalogPages))');
+  change('disabled={used.has(p.id)} checked={used.has(p.id)||selectedProducts.has(p.id)} onChange={()=>setSelectedProducts(current=>{const next=new Set(current);next.has(p.id)?next.delete(p.id):next.add(p.id);return next})}', 'checked={used.has(p.id)} onChange={event=>onToggle(p.id,event.target.checked)}');
+  change('<button disabled={!selectedProducts.size}', '<button hidden disabled={!selectedProducts.size}');
+  change("const clearCatalog=()=>{if(!window.confirm('Katalogdaki tüm sayfa ve ürünler temizlensin mi? Geri al ile geri dönebilirsiniz.'))return;const blank=emptyPage();save([blank]);setPageId(blank.id);setBlockId(null)}", "const clearCatalog=()=>{if(!window.confirm('Katalogdaki tüm sayfa ve ürünler temizlensin mi? Geri al ile geri dönebilirsiniz.'))return;save([]);setPageId(blank.id);setBlockId(null)}");
+  source="// Immediate product selection and empty catalog start\nimport { selectedCatalogIds, selectCatalogProducts } from '../shared/catalogLiveSelection';\n"+source;fs.writeFileSync(file,source);
+ }
+}
