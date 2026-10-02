@@ -218,3 +218,23 @@ const replaceIds=(ids:string[])=>{`);
  fs.writeFileSync(file,source);
  }
 }
+
+// Model-only selection preserves the full source pool for saved cards and variants.
+{
+ let source=fs.readFileSync(file,'utf8');
+ if(!source.includes('// Catalog model selection')){
+ const change=(from,to)=>{if(!source.includes(from))throw new Error('Model selection anchor missing: '+from);source=source.replace(from,to)};
+ source="// Catalog model selection\nimport { catalogSelectableProducts, catalogModelName } from '../shared/catalogModelSelection';\nimport { LarienVariantControls } from './LarienVariantControls';\n"+source;
+ const start=source.indexOf('function ProductsPanel('),end=source.indexOf('function PageSettingsPanel(',start);
+ let panel=source.slice(start,end);
+ panel=panel.replace('products.filter(p=>{', 'catalogSelectableProducts(products,catalogPages).filter(p=>{');
+ panel=panel.replace('[brand,sortOrder,products,q,cat', '[catalogPages,brand,sortOrder,products,q,cat');
+ panel=panel.replace('{p.name}</div>', '{catalogModelName(p)}</div>');
+ if(!panel.includes('catalogSelectableProducts(products,catalogPages)'))throw new Error('Model pool missing');
+ source=source.slice(0,start)+panel+source.slice(end);
+ change('{products.map(p=><option key={p.id} value={p.id}>{p.name} · {p.sku}</option>)}', '{catalogSelectableProducts(products,[page]).map(p=><option key={p.id} value={p.id}>{catalogModelName(p)} · {p.sku}</option>)}');
+ change("{prod&&block.frameKind==='product'&&<ProductImageControls", "{prod&&block.frameKind==='product'&&<LarienVariantControls product={prod} products={products} onPatch={onPatch}/>} {prod&&block.frameKind==='product'&&<ProductImageControls");
+ change('content:{...pg.content,blocks:(pg.content.blocks||[]).map(b=>b.id===id?{...b,...p}:b)}', 'content:{...pg.content,productIds:p.productId?(pg.content.productIds||[]).map(pid=>pid===current?.productId?p.productId!:pid):pg.content.productIds,blocks:(pg.content.blocks||[]).map(b=>b.id===id?{...b,...p}:b)}');
+ fs.writeFileSync(file,source);
+ }
+}
