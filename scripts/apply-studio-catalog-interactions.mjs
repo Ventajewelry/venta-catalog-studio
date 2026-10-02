@@ -160,3 +160,17 @@ const replaceIds=(ids:string[])=>{`);
   fs.writeFileSync(file,source);
  }
 }
+
+// Card automatic fields synced with current page
+{
+ const file='src/components/studio/CatalogStudioV5.tsx';
+ let source=fs.readFileSync(file,'utf8');
+ if(!source.includes('// Card automatic fields synced with current page')){
+  const change=(from,to)=>{if(!source.includes(from))throw new Error('Card automatic patch missing: '+from);source=source.replace(from,to)};
+  change('onRemove,info}:{page:Page;', 'onRemove,info,onAutomatic,onResetFields}:{page:Page;');
+  change('info:ProductInfoSettings}){const prod=', 'info:ProductInfoSettings;onAutomatic:(field:CatalogField,automatic:boolean)=>void;onResetFields:()=>void}){const prod=');
+  change('info={info} onPatch={onPatch} onReset={()=>onPatch({manualFields:undefined,productInfo:{...info,automaticFields:{name:true,sku:true,price:true,color:true,clarity:true,stoneDetails:true,stone:true,properties:true}},})}', 'info={info} onPatch={onPatch} onAutomatic={onAutomatic} onReset={onResetFields}');
+  change('onPatch={p=>patch(b.id,p)} onRemove=', 'onPatch={p=>patch(b.id,p)} onAutomatic={(field,automatic)=>resetFields(true,field,automatic)} onResetFields={()=>resetFields(true)} onRemove=');
+  fs.writeFileSync(file,'// Card automatic fields synced with current page\n'+source);
+ }
+}
