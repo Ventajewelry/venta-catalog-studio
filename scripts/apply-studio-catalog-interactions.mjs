@@ -258,3 +258,14 @@ const replaceIds=(ids:string[])=>{`);
  fs.writeFileSync(file,source);
  }
 }
+
+// Catalog display currencies and rounding (shared by editor, preview and PDF).
+{
+ let source=fs.readFileSync(file,'utf8');
+ if(!source.includes('// Catalog display currencies')) {
+  const before="{productInfo.pricePrefix||'₺'}{(p.price*(1-(productInfo.discountPercent||0)/100)).toLocaleString('tr-TR')}";
+  if(!source.includes(before))throw new Error('Catalog price rendering anchor missing');
+  source="// Catalog display currencies\nimport { formatCatalogPrice } from '../shared/catalogPrice';\n"+source.replace(before,'{formatCatalogPrice(p.price,productInfo)}');
+  fs.writeFileSync(file,source);
+ }
+}

@@ -8,7 +8,7 @@ export type LayoutId=
   |'LAYOUT_S_MAGAZINE'|'LAYOUT_T_PRODUCT_INDEX'|'COVER'|'BACK_COVER';
 export type PageBlockType='image'|'product'|'text'|'frame';
 export type TextStyleSettings={fontSize?:number;fontWeight?:300|400|500|600;color?:string;align?:'left'|'center'|'right'};
-export interface ProductInfoSettings{automaticFields?:AutomaticFields;showName:boolean;showSku:boolean;showPrice:boolean;showMaterial:boolean;showCategory:boolean;showDescription:boolean;showColor?:boolean;showClarity?:boolean;showCertificate?:boolean;showStone?:boolean;showProperties?:boolean;position:'below'|'overlay'|'left'|'right';align:'left'|'center'|'right';fontFamily?:string;fontSize?:number;color?:string;pricePrefix?:string;lineGap?:number;discountPercent?:number;nameStyle?:TextStyleSettings;skuStyle?:TextStyleSettings;priceStyle?:TextStyleSettings;metaStyle?:TextStyleSettings;}
+export interface ProductInfoSettings{automaticFields?:AutomaticFields;showName:boolean;showSku:boolean;showPrice:boolean;showMaterial:boolean;showCategory:boolean;showDescription:boolean;showColor?:boolean;showClarity?:boolean;showCertificate?:boolean;showStone?:boolean;showProperties?:boolean;position:'below'|'overlay'|'left'|'right';align:'left'|'center'|'right';fontFamily?:string;fontSize?:number;color?:string;pricePrefix?:string;lineGap?:number;discountPercent?:number;currency?:'TRY'|'USD'|'EUR';usdRate?:number;eurRate?:number;roundPriceToHundred?:boolean;nameStyle?:TextStyleSettings;skuStyle?:TextStyleSettings;priceStyle?:TextStyleSettings;metaStyle?:TextStyleSettings;}
 export interface PageBlock{
   manualFields?:ManualFields;
   id:string; type:PageBlockType; url?:string; productId?:string; linkUrl?:string; showQr?:boolean; alt?:string;
