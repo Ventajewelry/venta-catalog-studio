@@ -269,3 +269,18 @@ const replaceIds=(ids:string[])=>{`);
   fs.writeFileSync(file,source);
  }
 }
+
+// Card price editor follows the page currency.
+{
+ let source=fs.readFileSync(file,'utf8');
+ if(!source.includes('// Card currency price editor')) {
+  const before='{formatCatalogPrice(p.price,productInfo)}';
+  if(!source.includes(before))throw new Error('Card currency rendering anchor missing');
+  source="// Card currency price editor\nimport { formatCatalogCardPrice } from '../shared/catalogPrice';\n"+source.replace(before,'{formatCatalogCardPrice(p.price,b,productInfo)}');
+  const inspector='Fiyat: ₺{prod.price.toLocaleString(\'tr-TR\')}';
+  if(!source.includes(inspector))throw new Error('Inspector currency rendering anchor missing');
+  source=source.replace(inspector,'Fiyat: {formatCatalogCardPrice(resolveCatalogProduct(prod,block,info).price,block,info)}');
+  source=source.replaceAll('products={products} onPatch={onPatch} onDuplicate={onDuplicate}/>', 'products={products} onPatch={onPatch} onDuplicate={onDuplicate} priceLabel={formatCatalogCardPrice(resolveCatalogProduct(prod,block,info).price,block,info)}/>');
+  fs.writeFileSync(file,source);
+ }
+}

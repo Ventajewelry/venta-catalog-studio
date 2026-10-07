@@ -1,3 +1,4 @@
+import type { PageBlock, ProductInfoSettings } from '../../types';
 export interface CatalogPriceSettings {
   currency?: 'TRY' | 'USD' | 'EUR';
   usdRate?: number;
@@ -17,6 +18,20 @@ export function catalogPriceValue(tlPrice: number, settings: CatalogPriceSetting
 }
 export function formatCatalogPrice(tlPrice: number, settings: CatalogPriceSettings): string {
   const value = catalogPriceValue(tlPrice, settings);
+  if (value === null) return '—';
+  const symbol = settings.currency === 'USD' ? '$' : settings.currency === 'EUR' ? '€' : '₺';
+  return symbol + value.toLocaleString('tr-TR', { maximumFractionDigits: 2 });
+}
+
+// Explicit card prices are already in the selected currency and must not be converted twice.
+export function catalogCardPriceValue(tlPrice: number, block: PageBlock, settings: Partial<ProductInfoSettings>): number | null {
+  const currency = settings.currency || 'TRY';
+  const manual = settings.automaticFields?.price === false ? block.manualFields?.priceByCurrency?.[currency] : undefined;
+  if (typeof manual === 'number' && Number.isFinite(manual) && manual >= 0) return manual;
+  return catalogPriceValue(tlPrice, settings);
+}
+export function formatCatalogCardPrice(tlPrice: number, block: PageBlock, settings: Partial<ProductInfoSettings>): string {
+  const value = catalogCardPriceValue(tlPrice, block, settings);
   if (value === null) return '—';
   const symbol = settings.currency === 'USD' ? '$' : settings.currency === 'EUR' ? '€' : '₺';
   return symbol + value.toLocaleString('tr-TR', { maximumFractionDigits: 2 });

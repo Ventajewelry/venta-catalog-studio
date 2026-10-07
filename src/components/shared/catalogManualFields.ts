@@ -7,7 +7,7 @@ export const catalogFields = [
 ] as const;
 export type CatalogField = typeof catalogFields[number]['key'];
 export type AutomaticFields = Partial<Record<CatalogField,boolean>>;
-export type ManualFields = Partial<Record<Exclude<CatalogField,'price'>,string>> & {price?:number};
+export type ManualFields = Partial<Record<Exclude<CatalogField,'price'>,string>> & {price?:number;priceByCurrency?:Partial<Record<'TRY'|'USD'|'EUR',number>>};
 export function automaticField(info:Partial<ProductInfoSettings>,key:CatalogField){return info.automaticFields?.[key]!==false}
 export function resolveCatalogProduct<T extends Product>(product:T,block:PageBlock,info:Partial<ProductInfoSettings>):T {
  const result={...product};
@@ -16,7 +16,7 @@ export function resolveCatalogProduct<T extends Product>(product:T,block:PageBlo
 }
 export function resetCatalogFields(pages:Page[],pageId?:string,field?:CatalogField,automatic=true):Page[]{
  return pages.map(page=>{if(pageId&&page.id!==pageId)return page;
- const clear=(value:ManualFields|undefined)=>{if(!automatic)return value;if(!field)return undefined;const next={...value};delete next[field];return next};
+ const clear=(value:ManualFields|undefined)=>{if(!automatic)return value;if(!field)return undefined;const next={...value};delete next[field];if(field==='price')delete next.priceByCurrency;return next};
  const reset=(info:Partial<ProductInfoSettings>|undefined)=>({...info,automaticFields:field?{...info?.automaticFields,[field]:automatic}:Object.fromEntries(catalogFields.map(f=>[f.key,true]))});
  return {...page,style:{...page.style,productInfoOverrides:reset(page.style?.productInfoOverrides)},content:{...page.content,blocks:page.content.blocks?.map(block=>({...block,manualFields:clear(block.manualFields),productInfo:reset(block.productInfo) as ProductInfoSettings}))}};
  });
