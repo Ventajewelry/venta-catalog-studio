@@ -8,7 +8,7 @@ export function continueCatalogProducts(pages:Page[],targetId:string,requested:s
  if(!queue.length)return pages;
  const next=ordered.map((p,i)=>{
   if(i<start||!queue.length)return p;
-  if(!(p.content.productIds||[]).length&&!(p.content.blocks||[]).some(b=>b.productId||(b.type==='text'&&b.alt?.trim())||(b.frameKind==='image'&&b.url))){const made=makePage(p,queue.splice(0,4));return {...made,id:p.id,order:p.order,title:p.title};}
+  if(!(p.content.productIds||[]).length&&!(p.content.blocks||[]).some(b=>b.frameKind==='product'||b.productId||(b.type==='text'&&b.alt?.trim())||(b.frameKind==='image'&&b.url))){const made=makePage(p,queue.splice(0,4));return {...made,id:p.id,order:p.order,title:p.title};}
   let changed=false;
   const blocks=(p.content.blocks||[]).map(b=>{
    if(b.frameKind!=='product'||b.productId||!queue.length)return b;
