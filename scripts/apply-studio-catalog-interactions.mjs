@@ -295,3 +295,18 @@ const replaceIds=(ids:string[])=>{`);
   fs.writeFileSync(file,source);
  }
 }
+
+// Adjustable logo and page number positions, shared by desktop and mobile.
+{
+ let source=fs.readFileSync(file,'utf8');
+ if(!source.includes('// Catalog overlay offsets')){
+  const logo="style={{top:'1%',left:'4%',right:'4%',height:'4%',display:'flex'";
+  const next="style={{top:'1%',left:'4%',right:'4%',height:'4%',transform:`translate(${(page.style as any)?.headerLogoOffsetX??(settings as any).headerLogoOffsetX??0}%,${((page.style as any)?.headerLogoOffsetY??(settings as any).headerLogoOffsetY??0)*25}%)`,display:'flex'";
+  if(!source.includes(logo))throw new Error('Logo position anchor missing');
+  source=source.replace(logo,next);
+  const number='style={{fontSize:`calc(${(page.style as any)?.pageNumberStyle';
+  if(!source.includes(number))throw new Error('Page number position anchor missing');
+  source=source.replace(number,'style={{translate:`calc(${((page.style as any)?.pageNumberOffsetX??(settings as any).pageNumberOffsetX??0)*7.6}px * var(--catalog-page-scale,1)) calc(${((page.style as any)?.pageNumberOffsetY??(settings as any).pageNumberOffsetY??0)*7.6*settings.pageHeight/settings.pageWidth}px * var(--catalog-page-scale,1))`,fontSize:`calc(${(page.style as any)?.pageNumberStyle');
+  fs.writeFileSync(file,'// Catalog overlay offsets\n'+source);
+ }
+}
