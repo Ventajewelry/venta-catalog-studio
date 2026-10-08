@@ -11,7 +11,9 @@ export function selectedCatalogIds(pages: Page[]): string[] {
 export function selectCatalogProducts(pages: Page[], requested: string[], selected: boolean, blank: Page, makePage: (base: Page, ids: string[])=>Page): Page[] {
   const ordered=[...pages].sort((a,b)=>a.order-b.order);
   if(selected){
-    const base=ordered.length?ordered:[blank];
+    const firstProduct=ordered.findIndex(p=>(p.content.productIds||[]).length||(p.content.blocks||[]).some(b=>b.productId));
+    const cleaned=firstProduct>0?ordered.filter((p,i)=>i>=firstProduct||(p.content.blocks||[]).some(b=>b.frameKind==='product'||(b.frameKind==='image'&&b.url)||(b.type==='text'&&b.alt?.trim()))):ordered;
+    const base=cleaned.length?cleaned:[blank];
     return continueCatalogProducts(base,base[0].id,requested,makePage);
   }
   const removed=new Set(requested),queue=selectedCatalogIds(ordered).filter(id=>!removed.has(id));
