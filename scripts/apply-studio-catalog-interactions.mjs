@@ -284,3 +284,14 @@ const replaceIds=(ids:string[])=>{`);
   fs.writeFileSync(file,source);
  }
 }
+
+// Export at the native catalog width so caption scale and its fitted box stay in sync.
+{
+ let source=fs.readFileSync(file,'utf8');
+ if(!source.includes('// PDF caption layout preserved')) {
+  const before="exportingAll?'min(760px,70vw)'";
+  if(!source.includes(before))throw new Error('PDF page width anchor missing');
+  source="// PDF caption layout preserved\n"+source.replace(before,"exportingAll?'760px'");
+  fs.writeFileSync(file,source);
+ }
+}
