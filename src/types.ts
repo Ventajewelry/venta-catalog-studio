@@ -1,3 +1,4 @@
+import type { DetailFeatures } from './components/shared/catalogDetailFeatures';
 import type { AutomaticFields, ManualFields } from './components/shared/catalogManualFields';
 export type LayoutId=
   |'LAYOUT_A_FULL_BLEED'|'LAYOUT_B_HERO_PRODUCT'|'LAYOUT_C_PRODUCT_GRID'|'LAYOUT_D_ASYMMETRIC'
@@ -5,11 +6,12 @@ export type LayoutId=
   |'LAYOUT_I_IMAGE_TEXT'|'LAYOUT_J_PRODUCT_FEATURE'|'LAYOUT_K_LOOK_PAGE'|'LAYOUT_L_COLLECTION_INDEX'
   |'LAYOUT_M_PRODUCT_GRID_12'|'LAYOUT_N_PRODUCT_GRID_16'|'LAYOUT_O_EDITORIAL_COLLAGE'
   |'LAYOUT_P_IMAGE_4_PRODUCTS'|'LAYOUT_Q_SPLIT_EDITORIAL'|'LAYOUT_R_PRODUCT_WALL'
-  |'LAYOUT_S_MAGAZINE'|'LAYOUT_T_PRODUCT_INDEX'|'COVER'|'BACK_COVER';
+  |'LAYOUT_S_MAGAZINE'|'LAYOUT_T_PRODUCT_INDEX'|'COVER'|'BACK_COVER'|'DETAIL_COMPACT_8'|'DETAIL_WIDE_3'|'DETAIL_PORTRAIT_4';
 export type PageBlockType='image'|'product'|'text'|'frame';
 export type TextStyleSettings={fontSize?:number;fontWeight?:300|400|500|600;color?:string;align?:'left'|'center'|'right'};
 export interface ProductInfoSettings{automaticFields?:AutomaticFields;showName:boolean;showSku:boolean;showPrice:boolean;showMaterial:boolean;showCategory:boolean;showDescription:boolean;showColor?:boolean;showClarity?:boolean;showCertificate?:boolean;showStone?:boolean;showProperties?:boolean;position:'below'|'overlay'|'left'|'right';align:'left'|'center'|'right';fontFamily?:string;fontSize?:number;color?:string;pricePrefix?:string;lineGap?:number;discountPercent?:number;currency?:'TRY'|'USD'|'EUR';usdRate?:number;eurRate?:number;roundPriceToHundred?:boolean;nameStyle?:TextStyleSettings;skuStyle?:TextStyleSettings;priceStyle?:TextStyleSettings;metaStyle?:TextStyleSettings;}
 export interface PageBlock{
+  detailFields?:Record<string,string>;
   manualFields?:ManualFields;
   id:string; type:PageBlockType; url?:string; productId?:string; linkUrl?:string; showQr?:boolean; alt?:string;
   x?:number;y?:number;width?:number;height?:number;zIndex?:number;objectFit?:'cover'|'contain';
@@ -19,6 +21,7 @@ export interface PageBlock{
   locked?:boolean;fitMode?:'cover'|'contain';
 }
 export interface CatalogSettings{
+  detailFeatures?:DetailFeatures;
   pageWidth:number;pageHeight:number;unit:'mm'|'px'|'in';showHeader:boolean;headerText:string;showPageNumbers:boolean;
   pageNumberPosition:'top-left'|'top-center'|'top-right'|'bottom-left'|'bottom-center'|'bottom-right';
   showFooter:boolean;footerText:string;footerPageNumbers:boolean;footerPosition:'left'|'center'|'right';
@@ -33,7 +36,7 @@ export interface Collection{id:string;name:string;season:string;description:stri
 export interface Page{
   id:string;catalogId:string;order:number;layoutId:LayoutId;title:string;
   content:{images?:string[];productIds?:string[];blocks?:PageBlock[];headline?:string;subheadline?:string;body?:string;quote?:string;hotspots?:Hotspot[]};
-  style?:{backgroundColor?:string;backgroundImage?:string;textColor?:string;customMargins?:string;overlayOpacity?:number;fontFamily?:string;fontSize?:number;lineHeight?:number;
+  style?:{detailFeatures?:DetailFeatures;backgroundColor?:string;backgroundImage?:string;textColor?:string;customMargins?:string;overlayOpacity?:number;fontFamily?:string;fontSize?:number;lineHeight?:number;
     showHeader?:boolean;headerText?:string;showFooter?:boolean;footerText?:string;showPageNumber?:boolean;pageNumberPosition?:CatalogSettings['pageNumberPosition'];
     gridSize?:number;gridVisible?:boolean;gridSnap?:boolean;gridLocked?:boolean;headerWidth?:number;headerHeight?:number;footerWidth?:number;footerHeight?:number;gridGapHorizontal?:number;gridGapVertical?:number;gridInsetLeft?:number;gridInsetRight?:number;gridInsetTop?:number;gridInsetBottom?:number;productInfoOverrides?:Partial<ProductInfoSettings>;headerFontSize?:number;headerFontWeight?:300|400|500|600;headerColor?:string;footerFontSize?:number;footerFontWeight?:300|400|500|600;footerColor?:string;}
 }
