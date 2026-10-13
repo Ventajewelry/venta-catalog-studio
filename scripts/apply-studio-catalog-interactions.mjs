@@ -336,3 +336,16 @@ const replaceIds=(ids:string[])=>{`);
   fs.writeFileSync(file,source);
  }
 }
+
+// Detail mode can be disabled, and editing settings cannot persist a blank starter page.
+{
+ let source=fs.readFileSync(file,'utf8');
+ if(!source.includes('// Reversible detail mode')){
+  source="// Reversible detail mode\nimport { cleanCatalogPages } from '../shared/catalogPageCleanup';\n"+source;
+  const change=(a,b)=>{if(!source.includes(a))throw new Error('Reversible detail anchor missing: '+a.slice(0,60));source=source.replace(a,b)};
+  change('onReplacePages?.(next.map((p,i)=>', 'onReplacePages?.(cleanCatalogPages(next,true).map((p,i)=>');
+  change('const undo=()=>', "const disableDetail=(local:boolean)=>{if(!page)return;const template=(page.style?.detailFeatures??settings.detailFeatures)?.template||'compact8';save(applyDetailPages(sorted,page.id,template,!local,(base,ids,layout)=>applyWithSettings({...base,content:{...base.content,productIds:ids}},layout as LayoutId),base=>cfg(base.layoutId).capacity,false));if(!local)onUpdateCatalog({settings:{...settings,detailFeatures:{enabled:false,template}}});setBlockId(null)};const undo=()=>");
+  change('onDetailTemplate={applyDetail} onPatchBlock', 'onDetailTemplate={applyDetail} onDetailDisable={disableDetail} onPatchBlock');
+  fs.writeFileSync(file,source);
+ }
+}
