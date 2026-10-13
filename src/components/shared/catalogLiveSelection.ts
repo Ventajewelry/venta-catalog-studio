@@ -24,7 +24,7 @@ export function selectCatalogProducts(pages: Page[], requested: string[], select
     const blocks=page.content.blocks?.map(block=>{
       if(block.frameKind!=='product')return block;
       const productId=queue.shift(),original=productId?originals.get(productId):undefined;
-      return {...block,productId,manualFields:original?.manualFields,imageScale:original?.imageScale??1,imagePositionX:original?.imagePositionX??50,imagePositionY:original?.imagePositionY??50};
+      return {...block,productId,manualFields:original?.manualFields,detailFields:original?.detailFields,imageScale:original?.imageScale??1,imagePositionX:original?.imagePositionX??50,imagePositionY:original?.imagePositionY??50};
     });
     return {...page,content:{...page.content,blocks,productIds:blocks?.filter(block=>block.frameKind==='product'&&block.productId).map(block=>block.productId!)||[]}};
   }).filter(page=>page.content.productIds?.length||page.content.blocks?.some(block=>block.frameKind!=='product'&&block.frameKind!=='empty'))

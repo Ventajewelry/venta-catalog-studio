@@ -310,3 +310,29 @@ const replaceIds=(ids:string[])=>{`);
   fs.writeFileSync(file,'// Catalog overlay offsets\n'+source);
  }
 }
+
+// Optional detail-feature catalog templates; normal product cards remain unchanged.
+{
+ let source=fs.readFileSync(file,'utf8');
+ if(!source.includes('// Detail feature catalogs')){
+  const change=(before,after)=>{if(!source.includes(before))throw new Error('Detail feature anchor missing: '+before.slice(0,70));source=source.replace(before,after)};
+  source="// Detail feature catalogs\nimport { DetailProductCard } from './DetailProductCard';\nimport { DetailFieldsEditor } from './DetailFeatureControls';\nimport { applyDetailPages, DetailTemplate } from '../shared/catalogDetailFeatures';\n"+source;
+  change("{id:'BACK_COVER',name:", "{id:'DETAIL_COMPACT_8',name:'Detay · 8’li yatay',capacity:8,kind:'grid',cols:2,rows:4},\n{id:'DETAIL_WIDE_3',name:'Detay · 3’lü geniş',capacity:3,kind:'grid',cols:1,rows:3},\n{id:'DETAIL_PORTRAIT_4',name:'Detay · 4’lü dikey',capacity:4,kind:'grid',cols:2,rows:2},\n{id:'BACK_COVER',name:");
+  change('const undo=()=>', "const applyDetail=(template:DetailTemplate,local:boolean)=>{if(!page)return;const next=applyDetailPages(sorted,page.id,template,!local,(base,ids,layout)=>applyWithSettings({...base,content:{...base.content,productIds:ids}},layout as LayoutId),base=>cfg(base.layoutId).capacity);save(next);if(!local)onUpdateCatalog({settings:{...settings,detailFeatures:{enabled:true,template}}});setBlockId(null)};const undo=()=>");
+  change('const productInfo={...infoDefaults', 'const detailConfig=page?.style?.detailFeatures??settings.detailFeatures;const productInfo={...infoDefaults');
+  const from=source.indexOf('>{p?.images?.[0]?<div className="relative w-[92%]');
+  const to=source.indexOf('</FittedProductInfo>}</div>',from);
+  if(from<0||to<0)throw new Error('Detail product renderer missing');
+  const original=source.slice(from+1,to+'</FittedProductInfo>}'.length);
+  source=source.slice(0,from+1)+'{p&&detailConfig?.enabled?<DetailProductCard product={p} block={b} info={productInfo} template={detailConfig.template}/>:<>'+original+'</>}' +source.slice(to+'</FittedProductInfo>}'.length);
+  change('onResetFields={resetFields}/>', 'onResetFields={resetFields} products={products} onDetailTemplate={applyDetail} onPatchBlock={patch}/>');
+  change('<ManualProductFields block={block} product={prod}', '<ManualProductFields block={block} product={prod}');
+  const anchor='{prod&&block.frameKind===\'product\'&&<ProductImageControls block={block} onPatch={onPatch}/>}';
+  change(anchor,anchor+'{prod&&block.frameKind===\'product\'&&<details className="border rounded-lg p-3"><summary className="text-xs font-medium cursor-pointer">Detay özellik bilgileri · bu kart</summary><div className="mt-3"><DetailFieldsEditor product={prod} block={block} onPatch={onPatch}/></div></details>}');
+  change("const ids=p.content.productIds||[];return {...p,layoutId:id", "const ids=p.content.productIds||[];const detailQueue=new Map<string,PageBlock[]>();p.content.blocks?.forEach(b=>{if(b.productId)detailQueue.set(b.productId,[...(detailQueue.get(b.productId)||[]),b])});return {...p,layoutId:id");
+  change("?{...b,productInfo:{...b.productInfo,...productInfoDefaults}}:b)", "?{...b,detailFields:detailQueue.get(b.productId||'')?.shift()?.detailFields,productInfo:{...b.productInfo,...productInfoDefaults}}:b)");
+  change("{...b,productId:two.productId}:b.id===second?{...b,productId:one.productId}", "{...b,productId:two.productId,detailFields:two.detailFields}:b.id===second?{...b,productId:one.productId,detailFields:one.detailFields}");
+  change("const removeProduct=(productId:string)=>{if(!page||!productId)return;", "const removeProduct=(productId:string)=>{if(!page||!productId)return;if((page.style?.detailFeatures??settings.detailFeatures)?.enabled){liveProducts([productId],false);return;}");
+  fs.writeFileSync(file,source);
+ }
+}
