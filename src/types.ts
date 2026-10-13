@@ -36,7 +36,7 @@ export interface Collection{id:string;name:string;season:string;description:stri
 export interface Page{
   id:string;catalogId:string;order:number;layoutId:LayoutId;title:string;
   content:{images?:string[];productIds?:string[];blocks?:PageBlock[];headline?:string;subheadline?:string;body?:string;quote?:string;hotspots?:Hotspot[]};
-  style?:{detailFeatures?:DetailFeatures;backgroundColor?:string;backgroundImage?:string;textColor?:string;customMargins?:string;overlayOpacity?:number;fontFamily?:string;fontSize?:number;lineHeight?:number;
+  style?:{detailPreviousLayout?:LayoutId;detailFeatures?:DetailFeatures;backgroundColor?:string;backgroundImage?:string;textColor?:string;customMargins?:string;overlayOpacity?:number;fontFamily?:string;fontSize?:number;lineHeight?:number;
     showHeader?:boolean;headerText?:string;showFooter?:boolean;footerText?:string;showPageNumber?:boolean;pageNumberPosition?:CatalogSettings['pageNumberPosition'];
     gridSize?:number;gridVisible?:boolean;gridSnap?:boolean;gridLocked?:boolean;headerWidth?:number;headerHeight?:number;footerWidth?:number;footerHeight?:number;gridGapHorizontal?:number;gridGapVertical?:number;gridInsetLeft?:number;gridInsetRight?:number;gridInsetTop?:number;gridInsetBottom?:number;productInfoOverrides?:Partial<ProductInfoSettings>;headerFontSize?:number;headerFontWeight?:300|400|500|600;headerColor?:string;footerFontSize?:number;footerFontWeight?:300|400|500|600;footerColor?:string;}
 }

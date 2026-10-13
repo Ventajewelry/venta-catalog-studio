@@ -1,3 +1,4 @@
+import { cleanCatalogPages } from './catalogPageCleanup';
 import type { Page, PageBlock, Product } from '../../types';
 export type DetailTemplate='compact8'|'wide3'|'portrait4';
 export type DetailFeatures={enabled:boolean;template:DetailTemplate};
@@ -24,8 +25,8 @@ export function detailValues(product:Product,block:PageBlock):Record<string,stri
  return Object.fromEntries(detailFields.map(([key])=>[key,Object.prototype.hasOwnProperty.call(block.detailFields||{},key)?(block.detailFields![key].trim()||'xxx'):(present(values[key])?String(values[key]):'xxx')]));
 }
 // Rebuild only product pages, keeping manual values with their individual cards.
-export function applyDetailPages(pages:Page[],targetId:string,template:DetailTemplate,all:boolean,rebuild:(base:Page,ids:string[],layout:string)=>Page,capacity:(page:Page)=>number):Page[]{
- const ordered=[...pages].sort((a,b)=>a.order-b.order),start=all?0:ordered.findIndex(p=>p.id===targetId);
+export function applyDetailPages(pages:Page[],targetId:string,template:DetailTemplate,all:boolean,rebuild:(base:Page,ids:string[],layout:string)=>Page,capacity:(page:Page)=>number,enabled=true):Page[]{
+ const ordered=cleanCatalogPages(pages).sort((a,b)=>a.order-b.order),start=all?0:ordered.findIndex(p=>p.id===targetId);
  if(start<0)return pages;
  const config=detailTemplates.find(t=>t.id===template)!;
  const cards=ordered.slice(start).flatMap(p=>{const blocks=p.content.blocks?.filter(b=>b.frameKind==='product'&&b.productId)||[];return blocks.length?blocks:(p.content.productIds||[]).map(productId=>({productId} as PageBlock))});
@@ -33,15 +34,15 @@ export function applyDetailPages(pages:Page[],targetId:string,template:DetailTem
  const queue=[...cards],next=ordered.slice(0,start),used=new Set(ordered.map(p=>p.id));
  const make=(base:Page,chunk:PageBlock[],layout:string,detail:boolean)=>{
   const made=rebuild(base,chunk.map(b=>b.productId!),layout);let index=0;
-  return {...made,style:detail?{...base.style,detailFeatures:{enabled:true,template}}:base.style,content:{...made.content,blocks:made.content.blocks?.map(b=>{if(b.frameKind!=='product')return b;const original=chunk[index++];return original?{...original,...b,manualFields:original.manualFields,detailFields:original.detailFields,imageScale:original.imageScale??1,imagePositionX:original.imagePositionX??50,imagePositionY:original.imagePositionY??50,productInfo:{...b.productInfo,...original.productInfo}}:b})}};
+  return {...made,style:detail?{...base.style,detailFeatures:{enabled,template},detailPreviousLayout:enabled?(base.style?.detailPreviousLayout||(String(base.layoutId).startsWith('DETAIL_')?'LAYOUT_C_PRODUCT_GRID':base.layoutId)):undefined}:base.style,content:{...made.content,blocks:made.content.blocks?.map(b=>{if(b.frameKind!=='product')return b;const original=chunk[index++];return original?{...original,...b,manualFields:original.manualFields,detailFields:original.detailFields,imageScale:original.imageScale??1,imagePositionX:original.imagePositionX??50,imagePositionY:original.imagePositionY??50,productInfo:{...b.productInfo,...original.productInfo}}:b})}};
  };
  for(let i=start;i<ordered.length;i++){
   const base=ordered[i],isTarget=base.id===targetId;
   if(!isTarget&&!base.content.productIds?.length&&!base.content.blocks?.some(b=>b.frameKind==='product')){next.push(base);continue;}
   if(!queue.length)continue;
-  const detail=all||isTarget,layout=detail?config.layout:base.layoutId,count=detail?config.capacity:Math.max(1,capacity(base));
+  const detail=all||isTarget,layout=detail?(enabled?config.layout:(base.style?.detailPreviousLayout||'LAYOUT_C_PRODUCT_GRID')):base.layoutId,count=detail&&enabled?config.capacity:Math.max(1,capacity({...base,layoutId:layout as Page['layoutId']}));
   next.push(make(base,queue.splice(0,count),layout,detail));
  }
- while(queue.length){const base=next.at(-1)||ordered[start];let id=crypto.randomUUID();while(used.has(id))id=crypto.randomUUID();used.add(id);next.push(make({...base,id,title:'Ürünler'},queue.splice(0,config.capacity),config.layout,true));}
+ while(queue.length){const base=next.at(-1)||ordered[start];let id=crypto.randomUUID();while(used.has(id))id=crypto.randomUUID();used.add(id);const layout=enabled?config.layout:(String(base.layoutId).startsWith('DETAIL_')?'LAYOUT_C_PRODUCT_GRID':base.layoutId),count=enabled?config.capacity:Math.max(1,capacity({...base,layoutId:layout as Page['layoutId']}));next.push(make({...base,id,title:'Ürünler'},queue.splice(0,count),layout,true));}
  return next.map((p,order)=>({...p,order}));
 }
