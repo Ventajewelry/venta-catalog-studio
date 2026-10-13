@@ -332,6 +332,7 @@ const replaceIds=(ids:string[])=>{`);
   change("const ids=p.content.productIds||[];return {...p,layoutId:id", "const ids=p.content.productIds||[];const detailQueue=new Map<string,PageBlock[]>();p.content.blocks?.forEach(b=>{if(b.productId)detailQueue.set(b.productId,[...(detailQueue.get(b.productId)||[]),b])});return {...p,layoutId:id");
   change("?{...b,productInfo:{...b.productInfo,...productInfoDefaults}}:b)", "?{...b,detailFields:detailQueue.get(b.productId||'')?.shift()?.detailFields,productInfo:{...b.productInfo,...productInfoDefaults}}:b)");
   change("{...b,productId:two.productId}:b.id===second?{...b,productId:one.productId}", "{...b,productId:two.productId,detailFields:two.detailFields}:b.id===second?{...b,productId:one.productId,detailFields:one.detailFields}");
+  change("const removeProduct=(productId:string)=>{if(!page||!productId)return;", "const removeProduct=(productId:string)=>{if(!page||!productId)return;if((page.style?.detailFeatures??settings.detailFeatures)?.enabled){liveProducts([productId],false);return;}");
   fs.writeFileSync(file,source);
  }
 }
